@@ -68,12 +68,10 @@ while ~term
             
             ostate = [];
             for j = 1:nplayers
-               if state{i}{6}==j
+               if state{i}{6} == state{j}{6}
                    pstate = state{j};
                else
                    ostate = [ostate state(j)];
-                   
-                   ostate{end}{8} = 0;
                end
                 
             end
@@ -109,11 +107,11 @@ while ~term
             
             plot(state{i}{1},state{i}{2},'o','color',state{i}{9});
             hold on
-            else %if health<=0
+        else %if health<=0
             dpqueue = [dpqueue i];
         end %if health
     end %for players
-    [state{1}{4}]
+
     dplist = [dplist state(dpqueue)];
     state(dpqueue)=[];
     nplayers = length(state);
