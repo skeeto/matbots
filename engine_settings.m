@@ -1,9 +1,11 @@
 % World settings
 world = [0 20 0 20];
 ts = 0.05;
+friendly_fire = 0;
 
 % Display settings
 heading_length = norm([world(1) - world(2) world(3) - world(4)])/35;
+record_game = 1;
 
 % Player settings
 energy_max = 100;
@@ -18,3 +20,7 @@ rifle_speed = 10;
 rifle_radius = rifle_speed * ts / 2;
 rifle_damage = 100;
 
+% Mine information
+mine_cost = 2;
+mine_radius = 3;
+mine_damage = 25;

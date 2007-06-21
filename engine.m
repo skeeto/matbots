@@ -74,13 +74,24 @@ while ~term
             
             %Change heading
             state{i}{8} = mod(state{i}{8}+deltaH + pi, 2*pi) - pi;
-                       
+            
             %Add rifle shot
             if strcmp(action,'rifle')
-                if rifle_cost<=state{i}{4}
-                rifle = { 'rifle' ; state{i}{1} ; state{i}{2} ; state{i}{8}};
+                if rifle_cost <= state{i}{4}
+                rifle = { 'rifle' ; state{i}{1} ; state{i}{2} ; ...
+                    state{i}{8} ; state{i}{5} };
                 objects = [objects {rifle}];
                 state{i}{4} = state{i}{4}-rifle_cost;
+                end
+            end
+
+            %Add mine
+            if strcmp(action,'mine')
+                if mine_cost <= state{i}{4}
+                    mine = { 'mine' ; state{i}{1} ; state{i}{2} ; ...
+                        state{i}{5} ; state{i}{6} ; {[]} };
+                    objects = [objects {mine}];
+                    state{i}{4} = state{i}{4} - mine_cost;
                 end
             end
 
@@ -96,7 +107,8 @@ while ~term
             
             plot(state{i}{1},state{i}{2},'o','color',state{i}{9});
             line([state{i}{1} state{i}{1} + cos(state{i}{8}) * heading_length], ...
-                 [state{i}{2} state{i}{2} + sin(state{i}{8}) * heading_length]);
+                 [state{i}{2} state{i}{2} + sin(state{i}{8}) * heading_length], ...
+                 'Color', state{i}{9});
 
             hold on
 
@@ -109,16 +121,29 @@ while ~term
     state(dpqueue)=[];
     nplayers = length(state);
 
+    % Iterate through object list
     delqueue = [];
     for i = 1:size(objects,2)
-        if objects{i}{1}=='rifle'
+        
+        % Rifle rounds
+        if strcmp(objects{i}{1}, 'rifle')
             objects{i}{2} = objects{i}{2}+cos(objects{i}{4})*rifle_speed*ts;
             objects{i}{3} = objects{i}{3}+sin(objects{i}{4})*rifle_speed*ts;
 
             for j = 1:nplayers
+                hit = 0;
                 d = norm([ state{j}{1}-objects{i}{2}  state{j}{2}-objects{i}{3} ]);
-                if d<=rifle_radius
-                    state{j}{3} = state{j}{3}-rifle_damage;
+                if d <= rifle_radius
+                    if (friendly_fire)
+                        hit = 1;
+                    else
+                        if ~strcmp(objects{i}{5}, state{j}{5})
+                            hit = 1;
+                        end
+                    end
+                end
+                if hit
+                    state{j}{3} = state{j}{3} - rifle_damage;
                     plot(state{j}{1},state{j}{2},'r*')
                     delqueue = [delqueue i];
                 end
@@ -131,14 +156,42 @@ while ~term
                 plot(objects{i}{2},objects{i}{3},'.')
             end
         end
+        
+        % Mines
+        if strcmp(objects{i}{1}, 'mine')
+            for j = 1:nplayers
+                hit = 0;
+                d = norm([ state{j}{1}-objects{i}{2}  state{j}{2}-objects{i}{3} ]);
+                if d <= mine_radius
+                    if (friendly_fire)
+                        if objects{i}{5} ~= state{j}{6}
+                            hit = 1;
+                        end
+                    else
+                        if ~strcmp(objects{i}{4}, state{j}{5})
+                            hit = 1;
+                        end
+                    end
+                end
+                if hit
+                    state{j}{3} = state{j}{3} - mine_damage;
+                    plot(state{j}{1},state{j}{2},'r*')
+                    delqueue = [delqueue i]; 
+                end
+            end
+            
+            plot(objects{i}{2}, objects{i}{3}, '+');            
+        end
     end
 
     objects(delqueue) = [];
 
     axis(world)
     axis square
-
-    watch(t) = getframe;
+    
+    if (record_game)
+        watch(t) = getframe;
+    end
 
     if length(state)==1
         term = 1;
@@ -146,12 +199,12 @@ while ~term
 
 end
 
-save gamemovie watch
-movie(watch)
+if (record_game)
+    save gamemovie watch
+    movie(watch);
+end
 
 end %while
-
-
 
 function [xnew,ynew,valid] = checkbounds(x,y,world)
 xnew = x;
