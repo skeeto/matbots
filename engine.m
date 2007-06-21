@@ -82,10 +82,8 @@ while ~term
             end
             
             %Change heading
-            state{i}{8} = state{i}{8}+deltaH;
-            
-           
-            
+            state{i}{8} = mod(state{i}{8}+deltaH + pi, 2*pi) - pi;
+                       
             %Check boundary
             [state{i}{1},state{i}{2}] = checkbounds(state{i}{1},state{i}{2},world);
             
@@ -106,7 +104,11 @@ while ~term
             end
             
             plot(state{i}{1},state{i}{2},'o','color',state{i}{9});
+            line([state{i}{1} state{i}{1}+cos(state{i}{8})], ...
+                [state{i}{2} state{i}{2}+sin(state{i}{8})]);
+
             hold on
+
         else %if health<=0
             dpqueue = [dpqueue i];
         end %if health
