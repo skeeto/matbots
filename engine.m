@@ -20,36 +20,27 @@ function  out = engine(playerdata)
 % ping
 % suicide
 
+eval('engine_settings');
+
 term = 0;
-maxenergy = 100;
-energyregen = 0.1;
-movecost = 0.1;
-riflecost = 5;
-maxhealth = 100;
-ts = 0.05;
-
-world = [0 20 0 20];
-
 nplayers = size(playerdata,1);
 
 dplist = []; %dead player list
 state = [];
 objects = [];
 
-maxdeltaH = pi/4;
-
 colorlist = [{[1 0 0]} {[0 1 0]} {[0 0 1]} {[1 0 1]} {[0 0 0]} {[.5 .5 1]}];
 
 for i = 1:nplayers
     player{1} = rand*(world(2)-world(1));
     player{2} = rand*(world(4)-world(3));
-    player{3} = maxhealth;
-    player{4} = maxenergy;
+    player{3} = health_max;
+    player{4} = energy_max;
     player{5} = playerdata{i,2};
     player{6} = i;
     player{7} = playerdata{i,1};
     player{8} = rand*2*pi;
-    player{9} = colorlist{i};
+    player{9} = colorlist{mod(i, length(colorlist)) + 1};
     state = [state {player}];
 end
 
@@ -61,9 +52,9 @@ while ~term
     dpqueue = [];
     for i = 1:nplayers
         if state{i}{3}>0
-            state{i}{4} = state{i}{4} + energyregen;
-            if state{i}{4}>maxenergy
-                state{i}{4} = maxenergy;
+            state{i}{4} = state{i}{4} + energy_regen;
+            if state{i}{4}>energy_max
+                state{i}{4} = energy_max;
             end
             
             ostate = [];
@@ -77,35 +68,35 @@ while ~term
             end
             
             [deltaH throttle action] = feval(state{i}{7},ostate,pstate,[]);
-            if abs(deltaH)>maxdeltaH
-                deltaH = maxdeltaH*sign(deltaH);
+            if abs(deltaH)>deltaH_max
+                deltaH = deltaH_max*sign(deltaH);
             end
             
             %Change heading
             state{i}{8} = mod(state{i}{8}+deltaH + pi, 2*pi) - pi;
                        
-            %Check boundary
-            [state{i}{1},state{i}{2}] = checkbounds(state{i}{1},state{i}{2},world);
-            
             %Add rifle shot
             if strcmp(action,'rifle')
-                if riflecost<=state{i}{4}
+                if rifle_cost<=state{i}{4}
                 rifle = { 'rifle' ; state{i}{1} ; state{i}{2} ; state{i}{8}};
                 objects = [objects {rifle}];
-                state{i}{4} = state{i}{4}-riflecost;
+                state{i}{4} = state{i}{4}-rifle_cost;
                 end
             end
 
              %Move Player
-            if throttle*movecost<=state{i}{4}
+            if throttle*move_cost<=state{i}{4}
                 state{i}{1} = state{i}{1}+throttle*cos(state{i}{8})*ts;
                 state{i}{2} = state{i}{2}+throttle*sin(state{i}{8})*ts;
-                state{i}{4} = state{i}{4}-movecost*throttle;
+                state{i}{4} = state{i}{4}-move_cost*throttle;
             end
             
+            %Check boundary
+            [state{i}{1},state{i}{2}] = checkbounds(state{i}{1},state{i}{2},world);
+            
             plot(state{i}{1},state{i}{2},'o','color',state{i}{9});
-            line([state{i}{1} state{i}{1}+cos(state{i}{8})], ...
-                [state{i}{2} state{i}{2}+sin(state{i}{8})]);
+            line([state{i}{1} state{i}{1} + cos(state{i}{8}) * heading_length], ...
+                 [state{i}{2} state{i}{2} + sin(state{i}{8}) * heading_length]);
 
             hold on
 
@@ -118,20 +109,16 @@ while ~term
     state(dpqueue)=[];
     nplayers = length(state);
 
-    rspeed = 10;
-    rradius = rspeed*ts/2;
-    rdamage = 100;
-
     delqueue = [];
     for i = 1:size(objects,2)
         if objects{i}{1}=='rifle'
-            objects{i}{2} = objects{i}{2}+cos(objects{i}{4})*rspeed*ts;
-            objects{i}{3} = objects{i}{3}+sin(objects{i}{4})*rspeed*ts;
+            objects{i}{2} = objects{i}{2}+cos(objects{i}{4})*rifle_speed*ts;
+            objects{i}{3} = objects{i}{3}+sin(objects{i}{4})*rifle_speed*ts;
 
             for j = 1:nplayers
                 d = norm([ state{j}{1}-objects{i}{2}  state{j}{2}-objects{i}{3} ]);
-                if d<=rradius
-                    state{j}{3} = state{j}{3}-rdamage;
+                if d<=rifle_radius
+                    state{j}{3} = state{j}{3}-rifle_damage;
                     plot(state{j}{1},state{j}{2},'r*')
                     delqueue = [delqueue i];
                 end

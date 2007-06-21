@@ -5,6 +5,8 @@
 % it is dead.
 function [deltaH throttle action] = seeker(state, player, objects)
 
+eval('engine_settings');
+
 pnum = player{6};
 xpos = player{1};
 ypos = player{2};
@@ -36,8 +38,8 @@ tx = state{tnum}{1};
 ty = state{tnum}{2};
 
 d = norm([tx-xpos ty-ypos]);
-px = (tx - lx)*2*d + tx;
-py = (ty - ly)*2*d + ty;
+px = (tx - lx) * (1 / (rifle_speed * ts)) * d + tx;
+py = (ty - ly) * (1 / (rifle_speed * ts)) * d + ty;
 
 thd = atan2(ypos - py, xpos - px);
 
