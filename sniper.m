@@ -1,4 +1,4 @@
-function [deltaH throttle action] = sniper(state,player,objects)
+function [deltaH throttle action] = sniper(state,player,objects,req)
 
 engine_settings;
 
