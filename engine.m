@@ -35,7 +35,14 @@ dplist = []; %dead player list
 state = [];
 objects = [];
 
-colorlist = [{[1 0 0]} {[0 1 0]} {[0 0 1]} {[1 0 1]} {[0 0 0]} {[.5 .5 1]}];
+colorlist = [{[1 0 0]} {[0 0 1]} {[0 1 0]} {[1 0 1]} {[0 0 0]} {[.5 .5 1]}];
+
+% Build a team list
+teams = [];
+for i = 1:nplayers
+    teams = [teams playerdata(i,2)];
+end
+teams = unique(teams);
 
 for i = 1:nplayers
     player{1} = rand*(world(2)-world(1));
@@ -46,7 +53,9 @@ for i = 1:nplayers
     player{6} = i;
     player{7} = playerdata{i,1};
     player{8} = rand*2*pi;
-    player{9} = colorlist{mod(i, length(colorlist)) + 1};
+    player{9} = colorlist{mod( ...
+        find(~cellfun('isempty', regexp(teams, player{5}))), ...
+        length(colorlist) + 1)};
     state = [state {player}];
 end
 
