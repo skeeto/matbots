@@ -2,6 +2,7 @@
 world = [0 20 0 20];
 ts = 0.05;
 friendly_fire = 0;
+player_hide = [8];
 
 % Display settings
 heading_length = norm([world(1) - world(2) world(3) - world(4)])/35;

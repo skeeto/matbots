@@ -69,6 +69,7 @@ while ~term
                    pstate = state{j};
                else
                    ostate = [ostate state(j)];
+                   ostate{end}(player_hide) = {[]};
                end
                 
             end
