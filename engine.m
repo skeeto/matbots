@@ -246,9 +246,11 @@ end
 dplist = [dplist state];
 for i = 1:length(dplist)
     for j = 1:length(dplist)
+       warning off
         if dplist{i}{6} == dplist{j}{6}
             pstate = dplist{j};
         end
+        warning on
     end
     try
         feval(dplist{i}{7},[],pstate,[]);
