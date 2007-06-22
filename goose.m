@@ -1,7 +1,8 @@
 function [deltaH throttle action] = goose(state,player,objects)
 
-num = player{6};
+engine_settings
 
+num = player{6};
 datafile = ['goosedat.mat'];
 
 if exist(datafile,'file') %if the .mat file exists
@@ -11,7 +12,12 @@ else  %initialize .mat file
     dist2 = 100;
     dist3 = 100;
     leaderaction = 'none';
-    firecount = 0;
+    leaderheading = player{8};
+    leaderthrottle = [];
+    target = [];
+    targethist = [];
+    otherfile = [];
+
 end
 
 xpos = player{1};
@@ -24,91 +30,122 @@ name = player{7};
 heading = player{8};
 h = heading;
 nothers = size(state,2);
+
 gooselist = [];
 for i = 1:nothers
-   if strcmp(state{i}{7},'goose')
-       gooselist = [gooselist state{i}{6}];
-   end
+    if strcmp(state{i}{7},'goose')
+        gooselist = [gooselist state{i}{6}];
+    end
 end
+myrank = sum(gooselist<num)+1;
 
-theleader = min([num gooselist]);
-
-R = .05; %Distance of flankers from leader
-FlankAngle = 0; %Angle behind leader
+R = rifle_radius*1.5; %Distance of flankers from leader
+FlankAngle = 70*pi/180; %Angle behind leader
 
 MDH = pi/25; %max delta H
 MT = 0.576; %max throttle
 
-RFvec = R*[cos(FlankAngle) sin(FlankAngle)]'; %vector from leader to right flanker
-LFvec = RFvec.*[-1; 1]; %vector from leader to left flanker
-
-RFvec = [cos(pi/2) sin(pi/2); -sin(pi/2) cos(pi/2)]*RFvec;
-LFvec = [cos(pi/2) sin(pi/2); -sin(pi/2) cos(pi/2)]*LFvec;
-
-RFvec = [cos(-h) sin(-h); -sin(-h) cos(-h)]*RFvec;
-LFvec = [cos(-h) sin(-h); -sin(-h) cos(-h)]*LFvec;
-
-%%%%%%%%%
-%%%%%%%%%
-RFpos = [state{theleader}{1} state{theleader}{2}]' + RFvec;
-LFpos = [state{theleader}{1} state{theleader}{2}]' + LFvec;
-
-myrank = 3 - sum(num<gooselist);
-
 if myrank==1
-    if linked
-   [deltaH throttle action] = sniper(state,player,objects)
-   leaderaction = action;
+    [deltaH throttle action] = sniper(state,player,objects);
+    leaderaction = action;
+    leaderheading = heading;
+    leaderthrottle = throttle;
+    otherfile = ['sniper' num2str(num) '.mat'];
+    load (otherfile);
+    
+    
+
+elseif mod(myrank,2)
+    load (otherfile)
+    theleader = gooselist(floor(myrank/2));
+    action = leaderaction;
+    
+    
+    if strcmp(action,'rifle')
+
+        dist = norm([state{target}{1}-xpos  state{target}{2}-ypos]);
+        
+            
+             targetx = state{target}{1};
+            targety = state{target}{2};
+            targetvector = targethist(2,:)-targethist(1,:);
+            timetotarget = dist/rifle_speed;
+            newtarget=[targetx targety] + targetvector*(timetotarget/0.05);
+            targetx = newtarget(1);
+            targety = newtarget(2);
+        
+        aim = atan2(targety-ypos,targetx-xpos);
+        deltaH = aim-heading;
+        deltaH = mod(deltaH+pi,2*pi)-pi;
+        throttle = leaderthrottle;
     else
-        distA = norm([xpos-state{gooselist(1)}{1} ypos-state{gooselist(1)}{2}]);
-        distB = norm([xpos-state{gooselist(2)}{1} ypos-state{gooselist(2)}{2}]);
-        
-        if distA>distB
-            targetx = state{gooselist(1)}{1};
-            targety = state{gooselist(1)}{2};
-        else
-            targetx = state{gooselist(2)}{1};
-            targety = state{gooselist(2)}{2};
-        end
-        
-        action = 'none';
-        throttle = 0;
-        
-        deltaH = 0;
-        
-    end
-elseif myrank==2
-  %  fprintf('I am %d, the RF\n',num)
-    lead = min(gooselist);
+    
+    
+    RFvec = R*[cos(FlankAngle) sin(FlankAngle)]';
+    RFvec = [cos(pi/2) sin(pi/2); -sin(pi/2) cos(pi/2)]*RFvec;
+    RFvec = [cos(-h) sin(-h); -sin(-h) cos(-h)]*RFvec;
+    RFpos = [state{theleader}{1} state{theleader}{2}]' + RFvec;
+
     targetx = RFpos(1);
     targety = RFpos(2);
+
     aim = atan2(targety-ypos,targetx-xpos);
     deltaH = aim-heading;
     deltaH = mod(deltaH+pi,2*pi)-pi;
     dist2 = norm([targetx targety]-[xpos ypos]);
-    throttle = dist2/0.05; 
-    throttle = throttle*abs(dist2-R/20);
-    if throttle>1
-        throttle = 1;
+
+
+    throttle = dist2^4;
     end
+    
+
+
+elseif ~mod(myrank,2)
+load (otherfile)
+    theleader = gooselist(floor(myrank/2));
     action = leaderaction;
-elseif myrank==3
-   % fprintf('I am %d, the LF\n',num)
-    lead = min(gooselist);
-    targetx = LFpos(1);
-    targety = LFpos(2);
-    aim = atan2(targety-ypos,targetx-xpos);
-    deltaH = aim-heading;
-    deltaH = mod(deltaH+pi,2*pi)-pi;
-    dist3 = norm([targetx targety]-[xpos ypos]);
-    throttle = dist3/0.05;
-    throttle = throttle*abs(dist3-R/20);
-    if throttle>1
-        throttle = 1;
+
+    if strcmp(action,'rifle')
+
+        dist = norm([state{target}{1}-xpos  state{target}{2}-ypos]);
+        
+            targetx = state{target}{1};
+            targety = state{target}{2};
+            targetvector = targethist(2,:)-targethist(1,:);
+            timetotarget = dist/rifle_speed;
+            newtarget=[targetx targety] + targetvector*(timetotarget/0.05);
+            targetx = newtarget(1);
+            targety = newtarget(2);
+        
+        aim = atan2(targety-ypos,targetx-xpos);
+        deltaH = aim-heading;
+        deltaH = mod(deltaH+pi,2*pi)-pi;
+        throttle = leaderthrottle;
+    else
+        LFvec = R*[-cos(FlankAngle) sin(FlankAngle)]';
+        LFvec = [cos(pi/2) sin(pi/2); -sin(pi/2) cos(pi/2)]*LFvec;
+        LFvec = [cos(-h) sin(-h); -sin(-h) cos(-h)]*LFvec;
+        LFpos = [state{theleader}{1} state{theleader}{2}]' + LFvec;
+
+        targetx = LFpos(1);
+        targety = LFpos(2);
+
+        aim = atan2(targety-ypos,targetx-xpos);
+        deltaH = aim-heading;
+        deltaH = mod(deltaH+pi,2*pi)-pi;
+
+        dist3 = norm([targetx targety]-[xpos ypos]);
+
+        throttle = dist3^4;
+
     end
-    action = leaderaction;
+
+
+
 end
-    if (dist2<R*1.2)&&(dist3<R*1.2)
-        linked = 1
-    end
-save (datafile,'linked','dist2','dist3','leaderaction','firecount')
+
+if (dist2<R*1.2)&&(dist3<R*1.2)
+    linked = 1;
+end
+
+save (datafile,'linked','dist2','dist3','leaderaction','leaderheading','leaderthrottle','leadertarget','targethist','otherfile')
