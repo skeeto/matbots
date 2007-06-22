@@ -235,8 +235,8 @@ while ~term
 
     objects(delqueue) = [];
 
+    axis equal
     axis(world)
-    axis square
     
     if (record_game)
         watch = [watch getframe];
