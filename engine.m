@@ -54,8 +54,8 @@ for i = 1:nplayers
     player{7} = playerdata{i,1};
     player{8} = rand*2*pi;
     player{9} = colorlist{mod( ...
-        find(~cellfun('isempty', regexp(teams, player{5}))), ...
-        length(colorlist) + 1)};
+        find(~cellfun('isempty', regexp(teams, ['^' player{5} '$']))) - 1, ...
+        length(colorlist)) + 1};
     state = [state {player}];
 end
 
@@ -107,7 +107,8 @@ while ~term
             if strcmp(action,'mine') && mine_enable
                 if mine_cost <= state{i}{4}
                     mine = { 'mine' ; state{i}{1} ; state{i}{2} ; ...
-                        state{i}{5} ; state{i}{6} ; {[]} };
+                        state{i}{5} ; state{i}{6} ; {[]} ; ...
+                        get_player_val(state, state{i}{6}, 9) };
                     objects = [objects {mine}];
                     state{i}{4} = state{i}{4} - mine_cost;
                 end
@@ -208,7 +209,8 @@ while ~term
             end
             
             if display_game
-                plot(objects{i}{2}, objects{i}{3}, '+');
+                plot(objects{i}{2}, objects{i}{3}, '+', ...
+                    'Color', objects{i}{7});
             end
         end
     end
@@ -297,6 +299,17 @@ plist = textscan(fid, '%s %s');
 playerdata = [];
 for i = 1:length(plist{1})
     playerdata = [playerdata; plist{1}(i) plist{2}(i)];
+end
+
+end
+
+% Get a player's value
+function out = get_player_val(state, player, pval)
+out = [];
+for i = 1:length(state)
+    if state{i}{6} == player
+        out = state{i}{pval};
+    end
 end
 
 end
