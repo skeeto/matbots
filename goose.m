@@ -3,7 +3,7 @@ function [deltaH throttle action] = goose(state,player,objects,req)
 engine_settings
 
 num = player{6};
-datafile = ['goosedat.mat'];
+datafile = ['goosedat' player{5} '.mat'];
 
 if isempty(state)
     if exist(datafile,'file')
@@ -48,6 +48,13 @@ end
 
 gooselist = [gooselist num];
 gooselist = sort(gooselist);
+
+if length(gooselist)==(nothers+1)
+    action = 'none';
+    throttle = 0;
+    deltaH = 0;
+    return
+end
 
 myrank = find(gooselist==num);
 
