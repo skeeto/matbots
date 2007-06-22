@@ -14,6 +14,7 @@ else
     target = 0;
     oldtarget = 0;
     targethist = [];
+    
 end
 
 xpos = player{1};
@@ -39,6 +40,14 @@ end
 
 if target~=oldtarget
     firenumber = 0;
+end
+
+if target>length(state)
+    throttle = 0;
+    deltaH = 0;
+    action = 'none';
+    
+    return
 end
 
 targetx = state{target}{1};
