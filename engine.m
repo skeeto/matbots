@@ -45,18 +45,30 @@ for i = 1:nplayers
 end
 teams = unique(teams);
 
+% Select team start areas.
+team_zone = [];
+for i = 1:length(teams)
+    team_zone{i} = [rand*(world(2)-world(1)) rand*(world(4)-world(3))];
+end
+
 for i = 1:nplayers
-    player{1} = rand*(world(2)-world(1));
-    player{2} = rand*(world(4)-world(3));
+    team = find(~cellfun('isempty', regexp(teams, ['^' playerdata{i,2} '$'])));
+    if group_teams
+        player{1} = team_zone{team}(1) + ...
+            (2 * rand * group_teams_radius) - group_teams_radius;
+        player{2} = team_zone{team}(2) + ...
+            (2 * rand * group_teams_radius) - group_teams_radius;
+    else
+        player{1} = rand*(world(2)-world(1));
+        player{2} = rand*(world(4)-world(3));        
+    end
     player{3} = health_max;
     player{4} = energy_max;
     player{5} = playerdata{i,2};
     player{6} = i;
     player{7} = playerdata{i,1};
     player{8} = rand*2*pi;
-    player{9} = colorlist{mod( ...
-        find(~cellfun('isempty', regexp(teams, ['^' player{5} '$']))) - 1, ...
-        length(colorlist)) + 1};
+    player{9} = colorlist{mod(team - 1, length(colorlist)) + 1};
     state = [state {player}];
 end
 
