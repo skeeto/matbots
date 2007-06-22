@@ -205,6 +205,21 @@ while ~term
 
 end
 
+% Ask each bot to clean up.
+dplist = [dplist state];
+for i = 1:length(dplist)
+    for j = 1:length(dplist)
+        if dplist{i}{6} == dplist{j}{6}
+            pstate = dplist{j};
+        end
+    end
+    try
+        feval(dplist{i}{7},[],pstate,[]);
+    catch
+    end
+end
+
+
 if (record_game)
     save gamemovie watch
     movie(watch);
