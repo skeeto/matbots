@@ -48,8 +48,12 @@ if t_list(1) == pnum
     % We are the leader (choose a target)
     tnum = get_target(state, target);
     if (tnum == -1)
-        tnum = ceil(rand*length(state));
-        target = state{tnum}{6};
+        if ~isempty(state)
+            tnum = ceil(rand*length(state));
+            target = state{tnum}{6};
+        else
+            target = -1;
+        end
     end
 else
     % We are a follower

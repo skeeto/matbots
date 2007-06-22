@@ -38,10 +38,17 @@ if exist([matfile  '.mat'], 'file')
         end
     end
     if tnum == -1 && length(state) > 0
-        tnum = ceil(rand*length(state));
-        target = state{tnum}{6};
-        lx = state{tnum}{1};
-        ly = state{tnum}{1};
+        if ~isempty(state)
+            tnum = ceil(rand*length(state));
+            target = state{tnum}{6};
+            lx = state{tnum}{1};
+            ly = state{tnum}{1};
+        else
+            deltaH = 0;
+            action = 'none';
+            throttle = 0;
+            return;
+        end
     end
 else
     tnum = -1;
