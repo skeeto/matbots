@@ -277,7 +277,7 @@ end
 
 if (record_game)
     save gamemovie watch
-    movie(watch);
+    disp ('Saved movie to "gamemovie.mat".')
 end
 
 if ~exist('out', 'var')
