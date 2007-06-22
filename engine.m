@@ -209,8 +209,14 @@ while ~term
         watch(t) = getframe;
     end
 
-    if length(state)==1
+    check_teams = [];
+    for i = 1:nplayers
+        check_teams = [check_teams state{i}(5)];
+    end
+    check_teams = unique(check_teams);
+    if length(check_teams) == 1
         term = 1;
+        % Only one team left.
     end
 
 end
