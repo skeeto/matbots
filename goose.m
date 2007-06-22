@@ -1,9 +1,16 @@
 function [deltaH throttle action] = goose(state,player,objects)
 
+
+
 engine_settings
 
 num = player{6};
 datafile = ['goosedat.mat'];
+
+if isempty(state)
+    delete (datafile)
+    return
+end
 
 if exist(datafile,'file') %if the .mat file exists
     load(datafile)
@@ -148,4 +155,4 @@ if (dist2<R*1.2)&&(dist3<R*1.2)
     linked = 1;
 end
 
-save (datafile,'linked','dist2','dist3','leaderaction','leaderheading','leaderthrottle','leadertarget','targethist','otherfile')
+save (datafile,'linked','dist2','dist3','leaderaction','leaderheading','leaderthrottle','targethist','otherfile')
