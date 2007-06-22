@@ -20,6 +20,15 @@ if (isempty(state))
     return;
 end
 
+% Clear out teammates from the state list
+t_list = [];
+for i = 1:length(state)
+    if strcmp(state{i}{5}, player{5})
+        t_list = [t_list i];
+    end
+end
+state(t_list) = [];
+
 if exist([matfile  '.mat'], 'file')
     load(matfile);
     tnum = -1;
@@ -28,18 +37,29 @@ if exist([matfile  '.mat'], 'file')
             tnum = i;
         end
     end
-    if tnum == -1
+    if tnum == -1 && length(state) > 0
         tnum = ceil(rand*length(state));
         target = state{tnum}{6};
         lx = state{tnum}{1};
         ly = state{tnum}{1};
     end
 else
-    tnum = ceil(rand*length(state));
-    target = state{tnum}{6};
-    wt = 0;
-    lx = state{tnum}{1};
-    ly = state{tnum}{1};
+    tnum = -1;
+    if length(state) > 0
+        tnum = ceil(rand*length(state));
+        target = state{tnum}{6};
+        wt = 0;
+        lx = state{tnum}{1};
+        ly = state{tnum}{1};
+    end
+end
+
+% No targets left
+if tnum == -1
+    detlaH = 0;
+    throttle = 0;
+    action = 'none';
+    return;
 end
 
 tx = state{tnum}{1};
