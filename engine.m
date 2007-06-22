@@ -1,4 +1,10 @@
-function  out = engine(playerdata)
+function  out = engine(player_list_file)
+
+if exist('player_list_file', 'var')
+    playerdata = get_playerdata(player_list_var);
+else
+    playerdata = get_playerdata('player_list.txt');
+end
 
 %1 xpos
 %2 ypos
@@ -226,6 +232,19 @@ end
 if y>world(4)
     ynew = world(4);
     valid = 0;
+end
+
+end
+
+% Load player list from file
+function playerdata = get_playerdata(file)
+
+fid = fopen(file, 'r');
+plist = textscan(fid, '%s %s');
+
+playerdata = []
+for i = 1:length(plist{1})
+    playerdata = [playerdata; plist{1}(i) plist{2}(i)];
 end
 
 end

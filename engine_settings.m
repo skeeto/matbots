@@ -22,5 +22,5 @@ rifle_damage = 100;
 
 % Mine information
 mine_cost = 2;
-mine_radius = 3;
+mine_radius = 2;
 mine_damage = 25;
