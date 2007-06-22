@@ -98,7 +98,7 @@ while ~term
                 
             end
             
-            [deltaH throttle action] = feval(state{i}{7},ostate,pstate,[]);
+            [deltaH throttle action] = feval(state{i}{7},ostate,pstate,[], []);
             if abs(deltaH)>deltaH_max
                 deltaH = deltaH_max*sign(deltaH);
             end
@@ -265,7 +265,7 @@ for i = 1:length(dplist)
         warning on
     end
     try
-        feval(dplist{i}{7},[],pstate,[]);
+        feval(dplist{i}{7},[],pstate,[],'clean');
     catch
     end
 end
