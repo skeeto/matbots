@@ -1,7 +1,7 @@
-function  out = engine(player_list_file)
+function out = engine(player_list_file)
 
 if exist('player_list_file', 'var')
-    playerdata = get_playerdata(player_list_var);
+    playerdata = get_playerdata(player_list_file);
 else
     playerdata = get_playerdata('player_list.txt');
 end
@@ -63,7 +63,9 @@ t = 0;
 clear watch
 while ~term
     t = t+1;
-    clf
+    if display_game
+        clf;
+    end
     dpqueue = [];
     for i = 1:nplayers
         if state{i}{3}>0
@@ -121,11 +123,13 @@ while ~term
             %Check boundary
             [state{i}{1},state{i}{2}] = checkbounds(state{i}{1},state{i}{2},world);
             
-            plot(state{i}{1},state{i}{2},'o','color',state{i}{9});
-            line([state{i}{1} state{i}{1} + cos(state{i}{8}) * heading_length], ...
-                 [state{i}{2} state{i}{2} + sin(state{i}{8}) * heading_length], ...
-                 'Color', state{i}{9});
-
+            if (display_game || record_game)
+                plot(state{i}{1},state{i}{2},'o','color',state{i}{9});
+                line([state{i}{1} state{i}{1} + cos(state{i}{8}) * heading_length], ...
+                    [state{i}{2} state{i}{2} + sin(state{i}{8}) * heading_length], ...
+                    'Color', state{i}{9});
+            end
+            
             hold on
 
         else %if health<=0
@@ -160,7 +164,9 @@ while ~term
                 end
                 if hit
                     state{j}{3} = state{j}{3} - rifle_damage;
-                    plot(state{j}{1},state{j}{2},'r*')
+                    if (display_game)
+                        plot(state{j}{1},state{j}{2},'r*');
+                    end
                     delqueue = [delqueue i];
                 end
             end
@@ -169,7 +175,9 @@ while ~term
             if ~valid
                 delqueue = [delqueue i];
             else
-                plot(objects{i}{2},objects{i}{3},'.')
+                if display_game
+                    plot(objects{i}{2},objects{i}{3},'.')
+                end
             end
         end
         
@@ -191,12 +199,16 @@ while ~term
                 end
                 if hit
                     state{j}{3} = state{j}{3} - mine_damage;
-                    plot(state{j}{1},state{j}{2},'r*')
+                    if display_game
+                        plot(state{j}{1},state{j}{2},'r*')
+                    end
                     delqueue = [delqueue i]; 
                 end
             end
             
-            plot(objects{i}{2}, objects{i}{3}, '+');            
+            if display_game
+                plot(objects{i}{2}, objects{i}{3}, '+');
+            end
         end
     end
 
@@ -207,6 +219,10 @@ while ~term
     
     if (record_game)
         watch(t) = getframe;
+    else
+        if (display_game)
+            watch = getframe;
+        end
     end
 
     check_teams = [];
@@ -215,8 +231,9 @@ while ~term
     end
     check_teams = unique(check_teams);
     if length(check_teams) == 1
-        term = 1;
         % Only one team left.
+        term = 1;
+        out = check_teams{1};
     end
 
 end
@@ -235,10 +252,13 @@ for i = 1:length(dplist)
     end
 end
 
-
 if (record_game)
     save gamemovie watch
     movie(watch);
+end
+
+if ~exist('out', 'var')
+    out = '';
 end
 
 end %while
