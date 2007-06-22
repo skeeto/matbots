@@ -94,7 +94,7 @@ while ~term
             state{i}{8} = mod(state{i}{8}+deltaH + pi, 2*pi) - pi;
             
             %Add rifle shot
-            if strcmp(action,'rifle')
+            if strcmp(action,'rifle') && rifle_enable
                 if rifle_cost <= state{i}{4}
                 rifle = { 'rifle' ; state{i}{1} ; state{i}{2} ; ...
                     state{i}{8} ; state{i}{5} };
@@ -104,7 +104,7 @@ while ~term
             end
 
             %Add mine
-            if strcmp(action,'mine')
+            if strcmp(action,'mine') && mine_enable
                 if mine_cost <= state{i}{4}
                     mine = { 'mine' ; state{i}{1} ; state{i}{2} ; ...
                         state{i}{5} ; state{i}{6} ; {[]} };
@@ -121,7 +121,8 @@ while ~term
             end
             
             %Check boundary
-            [state{i}{1},state{i}{2}] = checkbounds(state{i}{1},state{i}{2},world);
+            [valid state{i}{1} state{i}{2}] = ...
+                checkbounds(state{i}{1},state{i}{2},world);
             
             if (display_game || record_game)
                 plot(state{i}{1},state{i}{2},'o','color',state{i}{9});
@@ -171,7 +172,7 @@ while ~term
                 end
             end
 
-            [dummy,dummy,valid] = checkbounds(objects{i}{2},objects{i}{3},world);
+            valid = checkbounds(objects{i}{2},objects{i}{3},world);
             if ~valid
                 delqueue = [delqueue i];
             else
@@ -218,7 +219,7 @@ while ~term
     axis square
     
     if (record_game)
-        watch(t) = getframe;
+        watch = [watch getframe];
     else
         if (display_game)
             watch = getframe;
@@ -263,7 +264,7 @@ end
 
 end %while
 
-function [xnew,ynew,valid] = checkbounds(x,y,world)
+function [valid xnew ynew] = checkbounds(x,y,world)
 xnew = x;
 ynew = y;
 valid = 1;
