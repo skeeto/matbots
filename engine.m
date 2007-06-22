@@ -242,7 +242,7 @@ function playerdata = get_playerdata(file)
 fid = fopen(file, 'r');
 plist = textscan(fid, '%s %s');
 
-playerdata = []
+playerdata = [];
 for i = 1:length(plist{1})
     playerdata = [playerdata; plist{1}(i) plist{2}(i)];
 end
