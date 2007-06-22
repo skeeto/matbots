@@ -12,8 +12,16 @@ xpos = player{1};
 ypos = player{2};
 hd   = player{8} - pi;
 
-if exist(['seeker' num2str(pnum) '.mat'], 'file')
-    load(['seeker' num2str(pnum)]);
+matfile = ['seeker' num2str(pnum)];
+
+% Cleanup mode:
+if (isempty(state))
+    delete([matfile  '.mat']);
+    return;
+end
+
+if exist([matfile  '.mat'], 'file')
+    load(matfile);
     tnum = -1;
     for i = 1:length(state)
         if state{i}{6} == target
@@ -65,7 +73,7 @@ end
 deltaH = thd - hd;
 deltaH = wrappi(deltaH);
 
-save(['seeker' num2str(pnum)], 'target', 'wt', 'lx', 'ly');
+save(matfile, 'target', 'wt', 'lx', 'ly');
 
 function out = wrappi(in)
 out = mod(in + pi, 2*pi) - pi;
