@@ -73,6 +73,10 @@ end
 deltaH = thd - hd;
 deltaH = wrappi(deltaH);
 
+if d < mine_radius && mine_enable
+    action = 'mine';
+end
+
 save(matfile, 'target', 'wt', 'lx', 'ly');
 
 function out = wrappi(in)
