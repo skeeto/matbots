@@ -11,14 +11,14 @@ action = 'none';
 throttle = 1;
 
 if (px < world(1) + buffer)
-    deltaH = pi
+    deltaH = deltaH_max;
 end
 if (px > world(2) - buffer)
-    deltaH = pi
+    deltaH = deltaH_max;
 end
 if (py < world(3) + buffer)
-    deltaH = pi
+    deltaH = deltaH_max;
 end
 if (py > world(4) - buffer)
-    deltaH = pi
+    deltaH = deltaH_max;
 end
