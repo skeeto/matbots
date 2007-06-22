@@ -7,7 +7,7 @@ player_hide = [8];
 % Display settings
 heading_length = norm([world(1) - world(2) world(3) - world(4)])/35;
 record_game = 0;
-display_game = 1;
+display_game = record_game || 1;
 
 % Player settings
 energy_max = 100;
