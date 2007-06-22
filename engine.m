@@ -73,7 +73,7 @@ for i = 1:nplayers
 end
 
 t = 0;
-clear watch
+watch = [];
 while ~term
     t = t+1;
     if display_game
@@ -92,8 +92,10 @@ while ~term
                if state{i}{6} == state{j}{6}
                    pstate = state{j};
                else
-                   ostate = [ostate state(j)];
-                   ostate{end}(player_hide) = {[]};
+                   if state{j}(3) > 0
+                       ostate = [ostate state(j)];
+                       ostate{end}(player_hide) = {[]};
+                   end
                end
                 
             end
