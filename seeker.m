@@ -3,7 +3,7 @@
 %
 % Selects a random target. Performs seek and destroy on that target until
 % it is dead.
-function [deltaH throttle action] = seeker(state, player, objects)
+function [deltaH throttle action] = seeker(state, player, objects, req)
 
 eval('engine_settings');
 

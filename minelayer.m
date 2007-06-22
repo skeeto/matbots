@@ -1,4 +1,4 @@
-function [deltaH throttle action] = minelayer(state, player, objects)
+function [deltaH throttle action] = minelayer(state, player, objects, req)
 
 eval('engine_settings');
 
@@ -15,7 +15,7 @@ else
     refill = 0;
 end
 
-[deltaH throttle action] = zombie(state, player, objects);
+[deltaH throttle action] = zombie(state, player, objects, req);
 
 if wt <= 0 && ~refill
     action = 'mine';

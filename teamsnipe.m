@@ -1,4 +1,4 @@
-function [deltaH throttle action] = teamsnipe(state, player, objects)
+function [deltaH throttle action] = teamsnipe(state, player, objects, req)
 
 eval('engine_settings');
 
@@ -82,7 +82,7 @@ else
 end
 
 if t_list(1) == pnum
-    if  (wt > 20)
+    if  (wt >= rifle_cost / energy_regen)
         action = 'rifle';
         wt = 0;
     else

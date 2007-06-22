@@ -1,4 +1,4 @@
-function [deltaH throttle action] = dummy(state,player,objects)
+function [deltaH throttle action] = dummy(state, player, objects, req)
 
 deltaH = rand*pi/4-pi/8;
 

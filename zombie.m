@@ -1,4 +1,4 @@
-function [deltaH throttle action] = zombie(state, player, objects)
+function [deltaH throttle action] = zombie(state, player, objects, req)
 
 eval('engine_settings');
 
