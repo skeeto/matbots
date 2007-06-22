@@ -28,15 +28,37 @@ heading = player{8};
 
 nothers = size(state,2);
 
-dist = 10000;
+deltaHlist = [];
+listindex = [];
 for i = 1:nothers
     if ~strcmp(team,state{i}{5})
-    if norm([state{i}{1}-xpos  state{i}{2}-ypos])<dist
-        target = i;
-        dist = norm([state{i}{1}-xpos  state{i}{2}-ypos]);
-    end
+        targetx = state{i}{1};
+        targety = state{i}{2};
+        aim = atan2(targety-ypos,targetx-xpos);
+        deltaH = aim-heading;
+        deltaH = mod(deltaH+pi,2*pi)-pi;
+        deltaHlist = [deltaHlist deltaH];
+        listindex = [listindex i];
     end
 end
+
+if isempty(deltaHlist)
+    throttle = 0;
+    deltaH = 0;
+    action = 'none';
+    return
+end
+    
+
+    whichindex = find(abs(deltaHlist)==min(abs(deltaHlist)));
+    target = listindex(whichindex);
+
+if target~=oldtarget
+   abs(deltaHlist)
+   target
+end
+
+dist = norm([state{target}{1}-xpos state{target}{2}-ypos]);
 
 if target~=oldtarget
     firenumber = 0;
