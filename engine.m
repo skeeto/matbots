@@ -92,7 +92,7 @@ while ~term
                if state{i}{6} == state{j}{6}
                    pstate = state{j};
                else
-                   if state{j}(3) > 0
+                   if state{j}{3} > 0
                        ostate = [ostate state(j)];
                        ostate{end}(player_hide) = {[]};
                    end
