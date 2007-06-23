@@ -1,3 +1,4 @@
+%--------------------------------------------------------------------------
 % World settings
 world = [0 10 0 10];
 ts = 0.05;
@@ -6,17 +7,29 @@ player_hide = [8];
 group_teams = 1;
 group_teams_radius = norm([world(1)-world(2) world(3)-world(4)]) / 10;
 
+%--------------------------------------------------------------------------
 % Display settings
 heading_length = norm([world(1) - world(2) world(3) - world(4)])/35;
-record_game = 0;
+record_game = 1;
 display_game = record_game || 1;
 
+% Display bars
+display_health = 1;
+display_energy = 1;
+bar_length = norm([world(1) - world(2) world(3) - world(4)])/30;
+bar_offset = norm([world(1) - world(2) world(3) - world(4)])/60;
+bar_stack_offset = norm([world(1) - world(2) world(3) - world(4)])/200;
+
+%--------------------------------------------------------------------------
 % Player settings
 energy_max = 100;
 energy_regen = 0.2;
 move_cost = 0.1;
 health_max = 100;
 deltaH_max = pi/4;
+
+%--------------------------------------------------------------------------
+% Actions
 
 % Rifle information
 rifle_enable = 1;
