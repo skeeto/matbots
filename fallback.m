@@ -22,6 +22,7 @@ elseif strcmp(req, 'preclean') || strcmp(req, 'clean')
 	if exist(team_file, 'file')
 		delete(team_file);
 	end
+	teamsnipe(state, player, objects, req);
 	return;
 else
 	% Ignore (unknown request)
@@ -60,9 +61,6 @@ ncoop = length(coop);
 if exist(team_file, 'file')
 	load(team_file);
 else
-	% Initialize target
-	target = -1;
-	
 	% Choose a corner:
 	% First find the center of mass of the group
 	xsum = px;
@@ -95,7 +93,7 @@ pos = find(coop_list == pnum);
 fighter = 0;
 nfight = (ncoop + 1)/(fight_frac);
 nwall = ncoop - nfight + 1;
-walld = (rifle_radius * nwall)/(0.5 * pi);
+walld = (rifle_radius * 2 * nwall)/(0.5 * pi);
 ad = (pi/2) / (nwall + 1);
 adf = (pi/2) / (nfight + 1);
 if walld < rifle_radius * 2
@@ -128,16 +126,17 @@ else
 	end	
 end
 
-if fighter || player{4} > energy_max - rifle_cost
+if fighter || ( ...
+		player{4} > energy_max - rifle_cost && ...
+		player{3} > health_max - rifle_damage)
+	% Shoot
 	[deltaH throttle action] = teamsnipe(state, player, objects, req);
+elseif player{3} < health_max && player{4} * health_energy_ratio > rifle_damage
+	% Transer energy to health
+	action = ['HtoE-' num2str(health_max - player{3})];
 end
 
-% Find the target
-%[tnum target] = find_target(enemy, target);
-%tx = enemy{tnum}{1};
-%ty = enemy{tnum}{2};
-
-save(team_file, 'corn', 'formH', 'target');
+save(team_file, 'corn', 'formH');
 
 %--------------------------------------------------------------------------
 % Chooses a target from the list of enemies
