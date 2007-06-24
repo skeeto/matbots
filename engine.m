@@ -131,10 +131,8 @@ while ~term
 					objects = [objects {rifle}];
 					state{i}{4} = state{i}{4}-rifle_cost;
 				end
-			end
-
-			%Add mine
-			if strcmp(action,'mine') && mine_enable
+				%Add mine
+			elseif strcmp(action,'mine') && mine_enable
 				if mine_cost <= state{i}{4}
 					mine = { 'mine' ; state{i}{1} ; state{i}{2} ; ...
 						state{i}{5} ; state{i}{6} ; {[]} ; ...
@@ -142,6 +140,24 @@ while ~term
 					objects = [objects {mine}];
 					state{i}{4} = state{i}{4} - mine_cost;
 				end
+			elseif regexp(action, '^HtoE')
+				amt = str2num(action(5:end));
+				if amt > 0
+					hamt = min([ ...
+						amt ...
+						state{i}{3} ...
+						(energy_max-state{i}{4})*health_energy_ratio]);
+					eamt = hamt * 1/health_energy_ratio;
+				else
+					eamt = min([ ...
+						amt/health_energy_ratio ...
+						state{i}{4} ...
+						(health_max-state{i}{3})/health_energy_ratio]);
+					hamt = eamt*health_energy_ratio;
+				end
+				state{i}{3} = state{i}{3} - hamt;
+				state{i}{4} = state{i}{4} + eamt;
+				plot(state{i}{1}, state{i}{2}, 'x', 'Color', [0 1 0]);
 			end
 
 			%Move Player
