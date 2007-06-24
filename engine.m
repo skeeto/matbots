@@ -72,6 +72,19 @@ for i = 1:nplayers
 	state = [state {player}];
 end
 
+% Have each bot prepare its files.
+for i = 1:length(state)
+	for j = 1:length(state)
+		if state{i}{6} == state{j}{6}
+			pstate = state{j};
+		end
+	end
+	try
+		feval(state{i}{7},[],pstate,[],'preclean');
+	catch
+	end
+end
+
 t = 0;
 watch = [];
 while ~term
@@ -102,6 +115,7 @@ while ~term
 			end
 
 			[deltaH throttle action] = feval(state{i}{7},ostate,pstate,[], []);
+			deltaH = mod(deltaH + pi, 2*pi) - pi;
 			if abs(deltaH)>deltaH_max
 				deltaH = deltaH_max*sign(deltaH);
 			end
