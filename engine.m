@@ -47,8 +47,13 @@ teams = unique(teams);
 
 % Select team start areas.
 team_zone = [];
+arc_d = 2*pi / length(teams);
+world_center = [world(2) - world(1) world(4) - world(3)] / 2;
+arc_rad = min(world_center - [world(1) world(3)]) - group_teams_radius;
 for i = 1:length(teams)
-	team_zone{i} = [rand*(world(2)-world(1)) rand*(world(4)-world(3))];
+    team_zone{i} = [ ...
+        world_center(1) + cos(arc_d * i - pi/4)*arc_rad ...
+        world_center(2) + sin(arc_d * i - pi/4)*arc_rad];
 end
 
 for i = 1:nplayers
