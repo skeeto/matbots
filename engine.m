@@ -55,6 +55,7 @@ for i = 1:length(teams)
         world_center(1) + cos(arc_d * i - pi/4)*arc_rad ...
         world_center(2) + sin(arc_d * i - pi/4)*arc_rad];
 end
+team_zone = team_zone(randperm(length(team_zone)));
 
 for i = 1:nplayers
 	team = find(~cellfun('isempty', regexp(teams, ['^' playerdata{i,2} '$'])));
