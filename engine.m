@@ -144,7 +144,8 @@ while ~term
 						get_player_val(state, state{i}{6}, 9) };
 					objects = [objects {mine}];
 					state{i}{4} = state{i}{4} - mine_cost;
-				end
+                end
+                % Health to Energy
 			elseif regexp(action, '^HtoE')
 				amt = str2num(action(5:end));
 				if amt > 0
@@ -152,16 +153,16 @@ while ~term
 						amt ...
 						state{i}{3} ...
 						(energy_max-state{i}{4})*health_energy_ratio]);
-					eamt = hamt * 1/health_energy_ratio;
+					eamt = -hamt * 1/health_energy_ratio;
 				else
 					eamt = min([ ...
-						amt/health_energy_ratio ...
+						-amt/health_energy_ratio ...
 						state{i}{4} ...
 						(health_max-state{i}{3})/health_energy_ratio]);
-					hamt = eamt*health_energy_ratio;
+					hamt = -eamt*health_energy_ratio;
 				end
 				state{i}{3} = state{i}{3} - hamt;
-				state{i}{4} = state{i}{4} + eamt;
+				state{i}{4} = state{i}{4} - eamt;
 				plot(state{i}{1}, state{i}{2}, 'x', 'Color', [0 1 0]);
 			end
 
