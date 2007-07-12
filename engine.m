@@ -264,6 +264,9 @@ while ~term
 
 		% Mines
 		if strcmp(objects{i}{1}, 'mine')
+            if display_game
+                plot(objects{i}{2}, objects{i}{3}, '+', 'Color', objects{i}{7});
+            end
 			for j = 1:nplayers
 				hit = 0;
 				d = norm([ state{j}{1}-objects{i}{2}  state{j}{2}-objects{i}{3} ]);
@@ -282,10 +285,34 @@ while ~term
 					state{j}{3} = state{j}{3} - mine_damage;
 					if display_game
 						plot(state{j}{1},state{j}{2},'r*')
-					end
-					delqueue = [delqueue i];
+                        delqueue = [delqueue i];
+                        explosion = { 'explosion' ; objects{i}{2} ; objects{i}{3} ; ...
+                            mine_radius ; objects{i}{7} ; explosion_steps};
+                        objects = [objects {explosion}];
+                    end
 				end
             end
+        end
+        
+        % Explosion
+        if strcmp(objects{i}{1}, 'explosion')
+            % 1 explosion
+            % 2 x
+            % 3 y
+            % 4 radius
+            % 5 color
+            % 6 timer
+            if display_game && objects{i}{6} >= 0
+                r = (explosion_steps - objects{i}{6}) ...
+                    / explosion_steps * objects{i}{4};
+                plot(...
+                    sin(0:.1:3*pi)*r+objects{i}{2}, ...
+                    cos(0:.1:3*pi)*r+objects{i}{3}, ...
+                    'Color', objects{i}{5});
+            else
+                delqueue = [delqueue i];
+            end
+            objects{i}{6} = objects{i}{6} - 1;
         end
         
         % Self destruct
