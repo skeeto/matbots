@@ -120,7 +120,7 @@ while ~term
 
             end
 
-            [deltaH throttle action] = feval(state{i}{7},ostate,pstate,[], []);
+            [deltaH throttle action] = feval(state{i}{7},ostate,pstate,objects, []);
             deltaH = mod(deltaH + pi, 2*pi) - pi;
             if abs(deltaH)>deltaH_max
                 deltaH = deltaH_max*sign(deltaH);
