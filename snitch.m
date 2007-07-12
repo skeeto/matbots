@@ -46,11 +46,26 @@ bulletlist(queue,:) = [];
 if isempty(bulletlist)
     throttle = 0;
     deltaH = 0;
-    if health<25
+    action = 'none';
+    if health<50
         action = ['HtoE-' num2str(energy_regen/health_energy_ratio)];
-    else
-        action = ['HtoE' num2str(health-75)];
     end
+    
+    if energy<90
+        action = ['HtoE' num2str(health-25)];
+    end
+    
+    if (energy>90)&&(health<90)
+        action = ['HtoE-' num2str(3*energy_regen/health_energy_ratio)];
+    end
+    
+    if (energy>50)&&(health>75)
+        [deltaH throttle action] = sniper(state,player,objects,req);
+        if abs(deltaH)<=deltaH_max
+            action = 'rifle';
+        end
+    end
+    
 else
     R = 0;
     H = 0;
@@ -86,14 +101,7 @@ else
             for i = 1:size(bulletlist,1)
                 hits = hits+impact(bulletlist(i,:),xnow,ynow);
             end
-            %                 R
-            %                 H
-            %                 Hstep
-            %                 heading
-            %                 xnow
-            %                 ynow
-            %                 hits
-            %                 pause
+          
             if ~hits   %if there are no hits, assign target position
                 safe = 1;
                 targetx = xnow;
@@ -112,8 +120,6 @@ else
         R = R+Rstep;
     end %while safe
 end
-
-
 
 end %snitch function
 
