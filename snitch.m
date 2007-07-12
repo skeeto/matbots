@@ -11,16 +11,31 @@ num = player{6};
 name = player{7};
 heading = player{8};
 
-datafile = ['snitch' team '.mat'];
-
-if exist(datafile,'file') %if the .mat file exists
-    load(datafile);
-else  %initialize .mat file
-
-end
+% datafile = ['snitch' team '.mat'];
+% 
+% if exist(datafile,'file') %if the .mat file exists
+%     load(datafile);
+% else  %initialize .mat file
+%     counter = 0;
+% end
+% counter = counter + 1;
+% 
+% save(datafile,'counter')
+% 
+% if counter>55
+%     action = 'suicide';
+%     throttle = 0;
+%     deltaH = 0;
+%     return
+% end
 
 Rstep = 0.1;
 Hstep = 10*pi/180;
+
+Hlist = 0;
+for i = Hstep:Hstep:pi
+    Hlist = [Hlist i -i i+pi -i+pi];
+end
 
 %%Put together list of all bullets on the map
 bulletlist = [];
@@ -111,6 +126,12 @@ else
                 deltaH = aim-heading;
                 deltaH = mod(deltaH+pi,2*pi)-pi;
                 throttle = 1;
+                
+                if abs(deltaH)>pi/2
+                    deltaH = deltaH+pi;
+                    throttle = -throttle;
+                end
+                
                 action = 'none';
 
                 break
