@@ -10,7 +10,7 @@ group_teams_radius = norm([world(1)-world(2) world(3)-world(4)]) / 10;
 %--------------------------------------------------------------------------
 % Display settings
 heading_length = norm([world(1) - world(2) world(3) - world(4)])/35;
-record_game = 0;
+record_game = 1;
 display_game = record_game || 1;
 
 % Display bars
@@ -45,5 +45,12 @@ mine_radius = 0.5;
 mine_damage = 10;
 
 % HtoE information
-enable_HtoE = 1;
+HtoE_enable = 1;
 health_energy_ratio = 1;
+
+% Self destruct information
+destruct_enable = 1;
+destruct_radius = 3;
+destruct_time = 1;
+destruct_damage = '2^(-d) * 25';
+destruct_cost = 5;

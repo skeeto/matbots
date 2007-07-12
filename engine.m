@@ -147,7 +147,7 @@ while ~term
 					state{i}{4} = state{i}{4} - mine_cost;
                 end
                 % Health to Energy
-			elseif regexp(action, '^HtoE')
+			elseif ~isempty(regexp(action, '^HtoE')) && HtoE_enable
 				amt = str2num(action(5:end));
 				if amt > 0
 					hamt = min([ ...
@@ -165,6 +165,16 @@ while ~term
 				state{i}{3} = state{i}{3} - hamt;
 				state{i}{4} = state{i}{4} - eamt;
 				plot(state{i}{1}, state{i}{2}, 'x', 'Color', [0 1 0]);
+                % self-destruct
+			elseif strcmp(action, 'destruct') && destruct_enable
+				if destruct_cost <= state{i}{4}
+					destruct = { 'destruct' ; state{i}{1} ; state{i}{2} ; ...
+						state{i}{5} ; state{i}{6} ; destruct_time ; ...
+						get_player_val(state, state{i}{6}, 9) };
+					objects = [objects {destruct}];
+					state{i}{4} = state{i}{4} - destruct_cost;
+					state{i}{3} = 0;
+                end                
 			end
 
 			%Move Player
@@ -275,12 +285,49 @@ while ~term
 					end
 					delqueue = [delqueue i];
 				end
-			end
-
-			if display_game
-				plot(objects{i}{2}, objects{i}{3}, '+', ...
-					'Color', objects{i}{7});
-			end
+            end
+        end
+        
+        % Self destruct
+        if strcmp(objects{i}{1}, 'destruct')
+            if display_game && objects{i}{6}/ts < 5 && objects{i}{6} >= 0
+                r = (5 - objects{i}{6}/ts)/5 * destruct_radius;
+                plot(...
+                    sin(0:.1:3*pi)*r+objects{i}{2}, ...
+                    cos(0:.1:3*pi)*r+objects{i}{3}, ...
+                    'r');
+            end
+            if objects{i}{6} <= 0
+                for j = 1:nplayers
+                    
+                    hit = 0;
+                    d = norm([ state{j}{1}-objects{i}{2}  state{j}{2}-objects{i}{3} ]);
+                    if d <= destruct_radius
+                        if (friendly_fire)
+                            if objects{i}{5} ~= state{j}{6}
+                                hit = 1;
+                            end
+                        else
+                            if ~strcmp(objects{i}{4}, state{j}{5})
+                                hit = 1;
+                            end
+                        end
+                    end
+                    if hit
+                        state{j}{3} = state{j}{3} - eval(destruct_damage);
+                        if display_game
+                            plot(state{j}{1},state{j}{2},'r*')
+                        end
+                    end
+                    delqueue = [delqueue i];
+                end
+            end
+            objects{i}{6} = objects{i}{6} - ts;
+            
+            if display_game
+                plot(objects{i}{2}, objects{i}{3}, 'p', ...
+                    'Color', objects{i}{7});
+            end
 		end
 	end
 
