@@ -1,4 +1,6 @@
 function [deltaH throttle action] = snitch(state,player,objects,req)
+load snitchtimer
+btime = cputime;
 
 engine_settings;
 
@@ -99,6 +101,8 @@ else
             end
         end
         
+        snitch_time = snitch_time + cputime-btime;
+        save snitchtimer impact_time snitch_time
         return
     end
 
@@ -142,10 +146,13 @@ else
     end %while safe
 end
 
+snitch_time = snitch_time + cputime-btime;
+save snitchtimer impact_time snitch_time
 end %snitch function
 
 function out = impact(bullet,x,y)
-
+load snitchtimer
+btime = cputime;
 engine_settings;
 
 bh = bullet(3); %bullet's heading
@@ -159,6 +166,8 @@ in = (bx>world(1))&&(bx<world(2))&&(by>world(3))&&(by<world(4));
 while in
     if dist<rifle_radius
         out = 1;
+        impact_time = impact_time + cputime-btime;
+        save snitchtimer impact_time snitch_time
         return
     end
     bx = bx + rifle_speed*ts*cos(bh);
@@ -168,4 +177,7 @@ while in
 end
 
 out = 0;
+
+        impact_time = impact_time + cputime-btime;
+        save snitchtimer impact_time snitch_time
 end %function

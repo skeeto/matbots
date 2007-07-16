@@ -192,12 +192,11 @@ while ~term
                 checkbounds(state{i}{1},state{i}{2},world);
 
             if (display_game || record_game)
-
                 plot(state{i}{1},state{i}{2},'o','color',state{i}{9});
                 line([state{i}{1} state{i}{1} + cos(state{i}{8}) * heading_length], ...
                     [state{i}{2} state{i}{2} + sin(state{i}{8}) * heading_length], ...
                     'Color', state{i}{9});
-
+                
                 if display_health
                     f = bar_stack_offset * display_energy;
                     plot([state{i}{1}-0.5*bar_length ...

@@ -1,7 +1,6 @@
-seeker red
-zombie blue
-zombie blue
-zombie blue
-zombie blue
-zombie blue
-zombie blue
+dummy a
+dummy a
+dummy a
+dummy a
+dummy a
+shooter b
