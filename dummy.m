@@ -7,8 +7,8 @@ if player{4}<35
     action = 'none';
 else
     throttle = 1;
-    if rand<.05
-        action = 'none';
+    if rand<.2
+        action = 'rifle';
     else
         action = 'none';
     end

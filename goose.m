@@ -59,7 +59,7 @@ end
 myrank = find(gooselist==num);
 
 R = rifle_radius*1.5; %Distance of flankers from leader
-FlankAngle = 45*pi/180; %Angle behind leader
+FlankAngle = 70*pi/180; %Angle behind leader
 
 MDH = pi/25; %max delta H
 MT = 0.576; %max throttle
@@ -87,10 +87,6 @@ elseif mod(myrank,2)
     if strcmp(action,'rifle')
         dist = norm([state{target}{1}-xpos  state{target}{2}-ypos]);
              
-        if size(targethist,1) == 1
-                targethist = [targethist; targethist];
-            end
-        
             targetx = state{target}{1};
             targety = state{target}{2};
             targetvector = targethist(2,:)-targethist(1,:);
@@ -102,9 +98,6 @@ elseif mod(myrank,2)
         aim = atan2(targety-ypos,targetx-xpos);
         deltaH = aim-heading;
         deltaH = mod(deltaH+pi,2*pi)-pi;
-        if abs(deltaH)>deltaH_max
-            action = 'none';
-        end
         throttle = leaderthrottle;
     else
       
@@ -140,10 +133,6 @@ load (otherfile)
 
         dist = norm([state{target}{1}-xpos  state{target}{2}-ypos]);
             
-            if size(targethist,1) == 1
-                targethist = [targethist; targethist];
-            end
-        
             targetx = state{target}{1};
             targety = state{target}{2};
             targetvector = targethist(2,:)-targethist(1,:);
@@ -155,9 +144,6 @@ load (otherfile)
             aim = atan2(targety-ypos,targetx-xpos);
             deltaH = aim-heading;
             deltaH = mod(deltaH+pi,2*pi)-pi;
-             if abs(deltaH)>deltaH_max
-            action = 'none';
-        end
             throttle = leaderthrottle;
     else
         LFvec = R*[-cos(FlankAngle) sin(FlankAngle)]';

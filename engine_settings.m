@@ -4,7 +4,7 @@ world = [0 10 0 10];
 ts = 0.05;
 friendly_fire = 0;
 player_hide = [8];
-group_teams = 0;
+group_teams = 1;
 group_teams_radius = norm([world(1)-world(2) world(3)-world(4)]) / 10;
 
 %--------------------------------------------------------------------------
@@ -42,7 +42,7 @@ rifle_damage = 10;
 % Mine information
 mine_enable = 1;
 mine_cost = 10;
-mine_radius = 0.2;
+mine_radius = 0.5;
 mine_damage = 10;
 
 % HtoE information

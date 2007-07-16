@@ -53,12 +53,24 @@ end
     whichindex = find(abs(deltaHlist)==min(abs(deltaHlist)));
     target = listindex(whichindex);
 
+if target~=oldtarget
+   abs(deltaHlist)
+   target
+end
+
 dist = norm([state{target}{1}-xpos state{target}{2}-ypos]);
 
 if target~=oldtarget
     firenumber = 0;
 end
 
+if target>length(state)
+    throttle = 0;
+    deltaH = 0;
+    action = 'none';
+    
+    return
+end
 
 targetx = state{target}{1};
 targety = state{target}{2};
@@ -100,13 +112,5 @@ end
 %pause
 
 throttle = (dist-rifle_radius)^2;
-
-if strcmp(action,'rifle')
-    if deltaH>deltaH_max;
-        action = 'none';
-    end
-end
-
-action = 'none';
 
 save (datafile,'firenumber','target','targethist')
