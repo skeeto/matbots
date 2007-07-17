@@ -22,11 +22,13 @@ if strcmp(req,'preclean')||strcmp(req,'clean')
     if exist(datafile,'file')
         delete(datafile)
     end
+    if strcmp(req,'preclean')
     firecount = 0;
     target = 0;
     oldtarget = 0;
     targethist = [];
     save (datafile,'firecount','target','oldtarget','targethist')
+    end
     return
 end
 
