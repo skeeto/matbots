@@ -14,6 +14,8 @@ display_game = 1;
 record_game = 0;
 script_game = 1;
 script_file = 'script_record.m';
+log_game = 1;
+log_file = 'game_log.mat';
 explosion_steps = 5;
 
 % Display bars

@@ -93,12 +93,20 @@ for i = 1:length(state)
     end
 end
 
+% Init log info
+add_log(nplayers,state,[],[],'init');
+
 t = 0;
 while ~term
-    t = t+1;
+    t = t + 1;
     eplot('clearframe'); % Clear the frame
     dpqueue = [];
     for i = 1:nplayers
+        add_log(state{i}{6}, 'xpos', t, state{i}{1});
+        add_log(state{i}{6}, 'ypos', t, state{i}{2});
+        add_log(state{i}{6}, 'health', t, state{i}{3});
+        add_log(state{i}{6}, 'energy', t, state{i}{4});
+
         if state{i}{3}>0
             state{i}{4} = state{i}{4} + energy_regen;
             if state{i}{4}>energy_max
@@ -118,7 +126,7 @@ while ~term
 
             end
 
-            [deltaH throttle action] = feval(state{i}{7},ostate,pstate,objects, []);
+            [deltaH throttle action] = feval(state{i}{7},ostate,pstate,objects,[]);
             deltaH = mod(deltaH + pi, 2*pi) - pi;
             if abs(deltaH)>deltaH_max
                 deltaH = deltaH_max*sign(deltaH);
@@ -135,6 +143,7 @@ while ~term
                         state{i}{9} };
                     objects = [objects {rifle}];
                     state{i}{4} = state{i}{4}-rifle_cost;
+                    add_log(state{i}{6}, 'rifle', t, 1);
                 end
                 %Add mine
             elseif strcmp(action,'mine') && mine_enable
@@ -144,6 +153,7 @@ while ~term
                         get_player_val(state, state{i}{6}, 9) };
                     objects = [objects {mine}];
                     state{i}{4} = state{i}{4} - mine_cost;
+                    add_log(state{i}{6}, 'mine', t, 1);
                 end
                 % Health to Energy
             elseif ~isempty(regexp(action, '^HtoE')) && HtoE_enable
@@ -161,6 +171,7 @@ while ~term
                         (health_max-state{i}{3})/health_energy_ratio]);
                     hamt = -eamt*health_energy_ratio;
                 end
+                add_log(state{i}{6}, 'HtoE', t, hamt, '+');
                 state{i}{3} = state{i}{3} - hamt;
                 state{i}{4} = state{i}{4} - eamt;
                 eplot(state{i}{1}, state{i}{2}, 'x', 'Color', [0 1 0]);
@@ -236,6 +247,7 @@ while ~term
                     else
                         if ~strcmp(objects{i}{5}, state{j}{5})
                             hit = 1;
+                            add_log(objects{i}{6}, 'rifle_hit', t, 1, '+')
                         end
                     end
                 end
@@ -265,10 +277,12 @@ while ~term
                     if (friendly_fire)
                         if objects{i}{5} ~= state{j}{6}
                             hit = 1;
+                            add_log(objects{i}{6}, 'mine_hit', t, 1, '+')
                         end
                     else
                         if ~strcmp(objects{i}{4}, state{j}{5})
                             hit = 1;
+                            add_log(objects{i}{6}, 'mine_hit', t, 1, '+')
                         end
                     end
                 end
@@ -366,11 +380,9 @@ end
 dplist = [dplist state];
 for i = 1:length(dplist)
     for j = 1:length(dplist)
-        warning off
         if dplist{i}{6} == dplist{j}{6}
             pstate = dplist{j};
         end
-        warning on
     end
     try
         feval(dplist{i}{7},[],pstate,[],'clean');
@@ -379,6 +391,7 @@ for i = 1:length(dplist)
 end
 
 eplot('finish');
+add_log([], [], t, [], 'finish');
 
 if ~exist('out', 'var')
     out = '';
@@ -386,6 +399,8 @@ end
 
 end %while
 
+%--------------------------------------------------------------------------
+% Check boundry against position
 function [valid xnew ynew] = checkbounds(x,y,world)
 xnew = x;
 ynew = y;
@@ -410,6 +425,7 @@ end
 
 end
 
+%--------------------------------------------------------------------------
 % Load player list from file
 function playerdata = get_playerdata(file)
 
@@ -434,6 +450,8 @@ end
 
 end
 
+%--------------------------------------------------------------------------
+% Plot wrapper
 function eplot(varargin)
 engine_settings;
 global watch;
@@ -446,7 +464,7 @@ if length(varargin) == 1
         end
         if script_game
             script_fid = fopen(script_file, 'wt');
-            fprintf(script_fid, '% Settings:\n');
+            fprintf(script_fid, '%% Settings:\n');
             fprintf(script_fid, 'record_game = 0;\n');
             fprintf(script_fid, 'watch = [];\n\n');
         end
@@ -522,6 +540,71 @@ if ~done_plot && (display_game || record_game)
 end
 if script_game
     fprintf(script_fid, '%s\n', plot_cmd);
+end
+
+end
+
+%--------------------------------------------------------------------------
+% Add to game log
+function add_log(pnum, log_field, t, log_val, mode)
+global bots;
+engine_settings;
+
+% Log data
+log_sparse_fields = {'rifle' 'rifle_hit' 'mine' 'mine_hit' 'HtoE'};
+log_full_fields   = {'energy' 'health' 'xpos' 'ypos'};
+
+if ~log_game
+    return;
+end
+
+if exist('mode', 'var')
+    if strcmp(mode, 'init')
+        % Initialize log structure
+        for i = 1:pnum
+            bots(i).name = log_field{i}{7};
+            bots(i).team = log_field{i}{5};
+            for j = log_sparse_fields
+                j = char(j);
+                bots(i).(j) = sparse([]);
+            end
+        end
+        return;
+    end
+    if strcmp(mode, 'finish')
+        % Make sure all fields are proper length
+        for i = 1:length(bots)
+            for j = log_sparse_fields
+                j = char(j);
+                if length(bots(i).(j)) < t
+                    bots(i).(j)(t) = 0;
+                end
+            end
+            for j = log_full_fields
+                j = char(j);
+                if length(bots(i).(j)) < t
+                    bots(i).(j) = [bots(i).(j) ...
+                        repmat(bots(i).(j)(end), 1, t - length(bots(i).(j)))];
+                end
+            end
+        end
+        save(log_file, 'bots');
+        disp(['Game log saved to ' log_file]);
+        return;
+    end
+else
+    mode = '';
+end
+
+if isempty(mode)
+    % Set value
+    bots(pnum).(log_field)(t) = log_val;
+else
+    % Add to value
+    if t > length(bots(pnum).(log_field))
+        bots(pnum).(log_field)(t) = 0;
+    end
+    bots(pnum).(log_field)(t) = bots(pnum).(log_field)(t) + log_val;  
 end
 
 end
