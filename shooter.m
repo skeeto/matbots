@@ -40,7 +40,7 @@ nothers = size(state,2);
 %% Bot Parameters
 oktoshoot = 1;
 firedelay = 10;
-maxhist = 10;
+maxhist = 100;
 
 
 %% Target Selection Routine
@@ -131,9 +131,14 @@ end %function shooter
 function [targetx, targety] = aimnderiv(xpos,ypos,targethist,n)
 
 engine_settings;
-
-while size(targethist,1)<n+1
-    targethist = [targethist; targethist];
+if size(targethist,1)<n+1
+    while size(targethist,1)<n+1
+        targethist = [targethist; targethist];
+    end
+elseif size(targethist,1)>n+1
+    while size(targethist,1)>n+1
+        targethist(1,:) = [];
+    end
 end
 
 nhist = size(targethist,1);
