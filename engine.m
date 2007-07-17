@@ -6,6 +6,9 @@ else
     playerdata = get_playerdata('player_list.txt');
 end
 
+% Make bots visible to the engine
+addpath('bots');
+
 %1 xpos
 %2 ypos
 %3 health
