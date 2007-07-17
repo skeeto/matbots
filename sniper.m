@@ -1,33 +1,54 @@
 function [deltaH throttle action] = sniper(state,player,objects,req)
+% SNIPER
+% coded by: Mike Abraham
+% last update: 07/17/2007
+%
+% This was the first of my successful bots.  SNIPER targets the bot that
+% requires the least change in heading to aim at.  The throttle is equal to
+% the square of the distance to the target (so the bot slows as it
+% approaches).  The aiming algorithm is my original first derivative
+% predictor.  SNIPER waits 'firedelay' timesteps between shots.  I think
+% there is still a bug that causes the bot to fire upon switching targets
+% and is the cause of a few random shots every so often.  SNIPER has no
+% energy management routines.
+
+%% Load Settings/Initialize Files/Unwrap Data
 
 engine_settings;
 
-num = player{6};
+datafile = ['sniper' num2str(player{5}) num2str(player{6}) '.mat'];
 
-datafile = ['sniper' num2str(num) '.mat'];
-
-if exist(datafile,'file')
-   load (datafile)
-   oldtarget = target;
-else
-    firenumber = 0;
+if strcmp(req,'preclean')||strcmp(req,'clean')
+    if exist(datafile,'file')
+        delete(datafile)
+    end
+    firecount = 0;
     target = 0;
     oldtarget = 0;
     targethist = [];
-    
+    save (datafile,'firecount','target','oldtarget','targethist')
+    return
 end
+
+load (datafile)
 
 xpos = player{1};
 ypos = player{2};
 health = player{3};
 energy = player{4};
 team = player{5};
-
+num = player{6};
 name = player{7};
 heading = player{8};
 
 nothers = size(state,2);
 
+%% Bot Parameters
+
+firedelay = 5;
+oktoshoot = 1;
+
+%% Target Selection Routine
 deltaHlist = [];
 listindex = [];
 for i = 1:nothers
@@ -42,28 +63,41 @@ for i = 1:nothers
     end
 end
 
+%% End of Game Condition
 if isempty(deltaHlist)
     throttle = 0;
     deltaH = 0;
     action = 'none';
     return
 end
-    
 
-    whichindex = find(abs(deltaHlist)==min(abs(deltaHlist)));
-    target = listindex(whichindex);
+%% Target Details
+whichindex = find(abs(deltaHlist)==min(abs(deltaHlist)));
+target = listindex(whichindex);
 
+<<<<<<< .mine
+targetx = state{target}{1};
+targety = state{target}{2};
+=======
 if target~=oldtarget
    abs(deltaHlist)
    target
 end
 
+>>>>>>> .r71
 dist = norm([state{target}{1}-xpos state{target}{2}-ypos]);
 
+%% Things to do when switching to a new target
 if target~=oldtarget
-    firenumber = 0;
+    targethist = [targetx targety; targetx targety]; %reset target history
+    firecount = firedelay;
+    oktoshoot = 0;
 end
+oldtarget = target;
 
+<<<<<<< .mine
+%% Aiming
+=======
 if target>length(state)
     throttle = 0;
     deltaH = 0;
@@ -75,6 +109,7 @@ end
 targetx = state{target}{1};
 targety = state{target}{2};
 
+>>>>>>> .r71
 targethist = [targethist; targetx targety];
 if size(targethist,1)==3
     targethist(1,:) = [];
@@ -89,28 +124,27 @@ aim = atan2(targety-ypos,targetx-xpos);
 deltaH = aim-heading;
 deltaH = mod(deltaH+pi,2*pi)-pi;
 
-if abs(deltaH)<pi/4
-    if firenumber==0
-        action = 'rifle';
-        firenumber = firenumber+1;    
-    else
-        action = 'none';
-        firenumber = firenumber+1;
-    end
+%% Check to see if aiming is complete
+if abs(deltaH)>deltaH_max
+    oktoshoot = 0;
+end
+
+%% FIRE
+if oktoshoot&&(firecount>=firedelay)
+    action = 'rifle';
+    firecount = 0;
 else
     action = 'none';
+    firecount = firecount+1;
 end
 
-if firenumber == 20;
-   firenumber = 0;
-end
-
-if dist<.05
+if dist<mine_radius
     action = 'mine';
 end
 
-%pause
-
+%% Throttle Management
 throttle = (dist-rifle_radius)^2;
 
-save (datafile,'firenumber','target','targethist')
+<<<<<<< .mine
+save (datafile,'firecount','target','targethist','oldtarget')=======
+save (datafile,'firenumber','target','targethist')>>>>>>> .r71

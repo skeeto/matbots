@@ -1,20 +1,28 @@
 function [deltaH throttle action] = shooter(state,player,objects,req)
+% SHOOTER
+% coded by: Mike Abraham
+% last update: 07/17/2007
+%
+% This is the newer and improveder version of SNIPER.  Not much is
+% different other than the aiming routine.  Here, aiming is done with the
+% help of a function that fits an nth order polynomial to the history of
+% the target's motion.  Tests have shown, unfortunately, that anything
+% higher than a 1st order polynomial performs quite poorly...so, this bot
+% is essentially SNIPER.
 
 engine_settings;
 
 datafile = ['shooter' player{5} num2str(player{6}) '.mat'];
 
 if strcmp(req,'preclean')
-
-if exist(datafile,'file')
-    delete(datafile)
-end
+    if exist(datafile,'file')
+        delete(datafile)
+    end
     targethist = [];
     oldtarget = 0;
     firecount = 0;
     save (datafile,'targethist','oldtarget','firecount')
 end
-
 
 load (datafile)
 
@@ -29,13 +37,14 @@ heading = player{8};
 
 nothers = size(state,2);
 
+%% Bot Parameters
 oktoshoot = 1;
 firedelay = 10;
 maxhist = 10;
 
-%%%%%
-%%%%% Begin routine to choose target
-%%%%%
+
+%% Target Selection Routine
+
 deltaHlist = [];
 listindex = [];
 for i = 1:nothers
@@ -50,18 +59,19 @@ for i = 1:nothers
     end
 end
 
+%% End of Game Condition
+
 if isempty(deltaHlist)
     throttle = 0;
     deltaH = 0;
     action = 'none';
     return
 end
-    
+
+%% Target Details
+
 whichindex = find(abs(deltaHlist)==min(abs(deltaHlist)));
 target = listindex(whichindex);
-%%%%
-%%%% End target selection routine
-%%%%
 
 %Position of target bot at current time:
 xt = state{target}{1};
@@ -70,33 +80,33 @@ yt = state{target}{2};
 %Distance to target bot at current time:
 dist = norm([xt-xpos yt-ypos]);
 
-%Things to do when switching to a new target
+%% Things to do when switching to a new target
 if target~=oldtarget
     targethist = []; %reset target history
     firecount = firedelay;
     oktoshoot = 0;
 end
 
-%Update Target History
+%% Update Target History
 targethist = [targethist; xt yt];
 if size(targethist,1)>maxhist
     targethist(1,:) = [];
 end
 
-%AIM
-[targetx, targety] = aimnderiv(xpos,ypos,targethist,2);
+%% AIM
+[targetx, targety] = aimnderiv(xpos,ypos,targethist,1);
 
-%%Aiming routine that points at: [targetx, targety]
+%% Produce deltaH
 aim = atan2(targety-ypos,targetx-xpos);
 deltaH = aim-heading;
 deltaH = mod(deltaH+pi,2*pi)-pi;
 
-%Check to see if aiming is complete
+%% Check to see if aiming is complete
 if abs(deltaH)>deltaH_max
     oktoshoot = 0;
 end
 
-%FIRE
+%% FIRE
 if oktoshoot&&(firecount>=firedelay)
     action = 'rifle';
     firecount = 0;
@@ -105,13 +115,13 @@ else
     firecount = firecount+1;
 end
 
-if dist<.05
+if dist<mine_radius
     action = 'mine';
 end
 
-throttle = 0;
+throttle = norm([xpos-targetx ypos-targety]).^2;
 
-%Update oldtarget
+%% Update oldtarget
 oldtarget = target;
 
 save (datafile,'targethist','oldtarget','firecount')
@@ -120,12 +130,10 @@ end %function shooter
 
 function [targetx, targety] = aimnderiv(xpos,ypos,targethist,n)
 
-
-
 engine_settings;
 
-while size(targethist,1)<n+1  
-    targethist = [targethist; targethist]; 
+while size(targethist,1)<n+1
+    targethist = [targethist; targethist];
 end
 
 nhist = size(targethist,1);
@@ -153,8 +161,22 @@ targety = polyval(ypoly,impacttime);
 
 if isempty(impacttime)
     fprintf('WTF, dude!?\n')
-    targetx = targethist(nhist,1);
-    targety = targethist(nhist,2);
+    n = n-1;
+    [targetx, targety] = aimnderiv(xpos,ypos,targethist,n);
 end
+
+% if ~isempty(impacttime)
+% figure
+% plot(xhist,yhist,'r.')
+% hold on
+% plot(polyval(xpoly,thist),polyval(ypoly,thist));
+% newt = linspace(0,impacttime,25);
+% plot(polyval(xpoly,newt),polyval(ypoly,newt),'g')
+% plot(targetx,targety,'b*')
+% axis equal
+% 
+% pause
+% close gcf
+% end
 
 end %function aim
