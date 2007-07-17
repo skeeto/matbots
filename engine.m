@@ -104,6 +104,7 @@ while ~term
     for i = 1:nplayers
         add_log(state{i}{6}, 'xpos', t, state{i}{1});
         add_log(state{i}{6}, 'ypos', t, state{i}{2});
+        add_log(state{i}{6}, 'heading', t, state{i}{8});
         add_log(state{i}{6}, 'health', t, state{i}{3});
         add_log(state{i}{6}, 'energy', t, state{i}{4});
 
@@ -552,7 +553,7 @@ engine_settings;
 
 % Log data
 log_sparse_fields = {'rifle' 'rifle_hit' 'mine' 'mine_hit' 'HtoE'};
-log_full_fields   = {'energy' 'health' 'xpos' 'ypos'};
+log_full_fields   = {'energy' 'health' 'xpos' 'ypos' 'heading'};
 
 if ~log_game
     return;
@@ -565,6 +566,7 @@ if exist('mode', 'var')
         for i = 1:pnum
             bots(i).name = log_field{i}{7};
             bots(i).team = log_field{i}{5};
+            bots(i).color = log_field{i}{9};
             for j = log_sparse_fields
                 j = char(j);
                 bots(i).(j) = sparse([]);
