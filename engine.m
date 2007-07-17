@@ -26,7 +26,9 @@ end
 % ping
 % suicide
 
-eval('engine_settings');
+engine_settings;
+
+eplot('init');
 
 term = 0;
 nplayers = size(playerdata,1);
@@ -92,13 +94,9 @@ for i = 1:length(state)
 end
 
 t = 0;
-watch = [];
 while ~term
     t = t+1;
-    if display_game
-        clf;
-        hold on;
-    end
+    eplot('clearframe'); % Clear the frame
     dpqueue = [];
     for i = 1:nplayers
         if state{i}{3}>0
@@ -164,7 +162,7 @@ while ~term
                 end
                 state{i}{3} = state{i}{3} - hamt;
                 state{i}{4} = state{i}{4} - eamt;
-                plot(state{i}{1}, state{i}{2}, 'x', 'Color', [0 1 0]);
+                eplot(state{i}{1}, state{i}{2}, 'x', 'Color', [0 1 0]);
                 % self-destruct
             elseif strcmp(action, 'destruct') && destruct_enable
                 if destruct_cost <= state{i}{4}
@@ -191,26 +189,23 @@ while ~term
             [valid state{i}{1} state{i}{2}] = ...
                 checkbounds(state{i}{1},state{i}{2},world);
 
-            if (display_game || record_game)
-
-                plot(state{i}{1},state{i}{2},'o','color',state{i}{9});
-                line([state{i}{1} state{i}{1} + cos(state{i}{8}) * heading_length], ...
-                    [state{i}{2} state{i}{2} + sin(state{i}{8}) * heading_length], ...
-                    'Color', state{i}{9});
-
-                if display_health
-                    f = bar_stack_offset * display_energy;
-                    plot([state{i}{1}-0.5*bar_length ...
-                        state{i}{1}+(state{i}{3}/health_max - 0.5)*bar_length], ...
-                        [state{i}{2}+bar_offset+f state{i}{2}+bar_offset+f],...
-                        'Color', [1 0 0]);
-                end
-                if display_energy
-                    plot([state{i}{1}-0.5*bar_length ...
-                        state{i}{1}+(state{i}{4}/energy_max - 0.5)*bar_length], ...
-                        [state{i}{2}+bar_offset state{i}{2}+bar_offset],...
-                        'Color', [0 0 1]);
-                end
+            eplot(state{i}{1},state{i}{2},'o','color',state{i}{9});
+            eplot([state{i}{1} state{i}{1} + cos(state{i}{8}) * heading_length], ...
+                [state{i}{2} state{i}{2} + sin(state{i}{8}) * heading_length], ...
+                'Color', state{i}{9});
+            
+            if display_health
+                f = bar_stack_offset * display_energy;
+                eplot([state{i}{1}-0.5*bar_length ...
+                    state{i}{1}+(state{i}{3}/health_max - 0.5)*bar_length], ...
+                    [state{i}{2}+bar_offset+f state{i}{2}+bar_offset+f],...
+                    'Color', [1 0 0]);
+            end
+            if display_energy
+                eplot([state{i}{1}-0.5*bar_length ...
+                    state{i}{1}+(state{i}{4}/energy_max - 0.5)*bar_length], ...
+                    [state{i}{2}+bar_offset state{i}{2}+bar_offset],...
+                    'Color', [0 0 1]);
             end
 
         else %if health<=0
@@ -245,9 +240,7 @@ while ~term
                 end
                 if hit
                     state{j}{3} = state{j}{3} - rifle_damage;
-                    if (display_game)
-                        plot(state{j}{1},state{j}{2},'r*');
-                    end
+                    eplot(state{j}{1},state{j}{2},'r*');
                     delqueue = [delqueue i];
                 end
             end
@@ -256,17 +249,13 @@ while ~term
             if ~valid
                 delqueue = [delqueue i];
             else
-                if display_game
-                    plot(objects{i}{2},objects{i}{3},'.')
-                end
+                eplot(objects{i}{2},objects{i}{3},'.')
             end
         end
 
         % Mines
         if strcmp(objects{i}{1}, 'mine')
-            if display_game
-                plot(objects{i}{2}, objects{i}{3}, '+', 'Color', objects{i}{7});
-            end
+            eplot(objects{i}{2}, objects{i}{3}, '+', 'Color', objects{i}{7});
             for j = 1:nplayers
                 hit = 0;
                 d = norm([ state{j}{1}-objects{i}{2}  state{j}{2}-objects{i}{3} ]);
@@ -283,22 +272,20 @@ while ~term
                 end
                 if hit
                     state{j}{3} = state{j}{3} - mine_damage;
-                    if display_game
-                        plot(state{j}{1},state{j}{2},'r*')
-                        delqueue = [delqueue i];
-                        explosion = { 'explosion' ; objects{i}{2} ; objects{i}{3} ; ...
-                            mine_radius ; objects{i}{7} ; explosion_steps};
-                        objects = [objects {explosion}];
-                    end
+                    eplot(state{j}{1},state{j}{2},'r*')
+                    delqueue = [delqueue i];
+                    explosion = { 'explosion' ; objects{i}{2} ; objects{i}{3} ; ...
+                        mine_radius ; objects{i}{7} ; explosion_steps};
+                    objects = [objects {explosion}];
                 end
             end
         end
 
         % Self destruct
         if strcmp(objects{i}{1}, 'destruct')
-            if display_game && objects{i}{6}/ts < 5 && objects{i}{6} >= 0
+            if objects{i}{6}/ts < 5 && objects{i}{6} >= 0
                 r = (5 - objects{i}{6}/ts)/5 * destruct_radius;
-                plot(...
+                eplot(...
                     sin(0:.1:3*pi)*r+objects{i}{2}, ...
                     cos(0:.1:3*pi)*r+objects{i}{3}, ...
                     'Color', objects{i}{7});
@@ -321,19 +308,15 @@ while ~term
                     end
                     if hit
                         state{j}{3} = state{j}{3} - eval(destruct_damage);
-                        if display_game
-                            plot(state{j}{1},state{j}{2},'r*')
-                        end
+                        eplot(state{j}{1},state{j}{2},'r*')
                     end
                     delqueue = [delqueue i];
                 end
             end
             objects{i}{6} = objects{i}{6} - ts;
 
-            if display_game
-                plot(objects{i}{2}, objects{i}{3}, 'p', ...
-                    'Color', objects{i}{7});
-            end
+            eplot(objects{i}{2}, objects{i}{3}, 'p', ...
+                'Color', objects{i}{7});
         end
 
         % Explosion
@@ -344,10 +327,10 @@ while ~term
             % 4 radius
             % 5 color
             % 6 timer
-            if display_game && objects{i}{6} >= 0
+            if objects{i}{6} >= 0
                 r = (explosion_steps - objects{i}{6}) ...
                     / explosion_steps * objects{i}{4};
-                plot(...
+                eplot(...
                     sin(0:.1:3*pi)*r+objects{i}{2}, ...
                     cos(0:.1:3*pi)*r+objects{i}{3}, ...
                     'Color', objects{i}{5});
@@ -361,16 +344,8 @@ while ~term
 
     objects(delqueue) = [];
 
-    axis equal
-    axis(world)
-
-    if (record_game)
-        watch = [watch getframe];
-    else
-        if (display_game)
-            watch = getframe;
-        end
-    end
+    % Dont plotting durrent frame
+    eplot('setframe');
 
     check_teams = [];
     for i = 1:nplayers
@@ -401,10 +376,7 @@ for i = 1:length(dplist)
     end
 end
 
-if (record_game)
-    save gamemovie watch
-    disp ('Saved movie to "gamemovie.mat".')
-end
+eplot('finish');
 
 if ~exist('out', 'var')
     out = '';
@@ -456,6 +428,98 @@ for i = 1:length(state)
     if state{i}{6} == player
         out = state{i}{pval};
     end
+end
+
+end
+
+function eplot(varargin)
+engine_settings;
+global watch;
+global script_fid;
+
+if length(varargin) == 1
+    if strcmp(varargin{1}, 'init')
+        if record_game
+            watch = [];
+        end
+        if script_game
+            script_fid = fopen(script_file, 'wt');
+            fprintf(script_fid, '% Settings:\n');
+            fprintf(script_fid, 'record_game = 0;\n');
+            fprintf(script_fid, 'watch = [];\n\n');
+        end
+    elseif strcmp(varargin{1}, 'finish')
+        if script_game
+            fclose(script_fid);
+        end
+        if record_game
+            save('gamemovie', 'watch');
+            disp('Saved movie to "gamemovie.mat".')
+        end
+    elseif strcmp(varargin{1}, 'clearframe')
+        if display_game || record_game
+            clf;
+            hold on;
+        end
+        if script_game
+            fprintf(script_fid, 'clf;\nhold on;\n');
+        end
+    elseif strcmp(varargin{1}, 'setframe')
+        if display_game || record_game
+            axis('equal');
+            axis(world);
+            drawnow;
+        end
+        if record_game
+            watch = [watch getframe];
+        end
+        if script_game
+            fprintf(script_fid, 'axis(''equal'');\n');
+            fprintf(script_fid, ['axis([' num2str(world) ']);\n']);
+            fprintf(script_fid, 'drawnow;\n');
+            fprintf(script_fid, 'if record_game\n');
+            fprintf(script_fid, '  watch = [watch getframe];\n');
+            fprintf(script_fid, 'end\n');
+        end
+    end
+    return;
+end
+
+% Avoid evaling a string
+done_plot = 0;
+if display_game || record_game
+    if nargin == 3
+        plot(varargin{1}, varargin{2}, varargin{3});
+        done_plot = 1;
+    elseif nargin == 4
+        plot(varargin{1}, varargin{2}, varargin{3}, varargin{4});
+        done_plot = 1;
+    elseif nargin == 5
+        plot(varargin{1}, varargin{2}, varargin{3}, varargin{4}, varargin{5});
+        done_plot = 1;
+    end
+end
+
+% Build plot string
+if (~done_plot && (display_game || record_game)) || script_game
+    plot_cmd = 'plot(';
+    for i = varargin
+        i = i{1};
+        if isnumeric(i)
+            plot_cmd = [plot_cmd '[' num2str(i) '], '];
+        else
+            plot_cmd = [plot_cmd '''' i ''', '];
+        end
+    end
+    plot_cmd(end-1:end) = [];
+    plot_cmd = [plot_cmd ');'];
+end
+
+if ~done_plot && (display_game || record_game)
+    eval(plot_cmd);
+end
+if script_game
+    fprintf(script_fid, '%s\n', plot_cmd);
 end
 
 end
