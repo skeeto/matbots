@@ -1,5 +1,8 @@
 function [deltaH throttle action] = snitch(state,player,objects,req)
 
+sniper(state,player,objects,req);
+uzi(state,player,objects,req);
+
 engine_settings;
 
 xpos = player{1};
