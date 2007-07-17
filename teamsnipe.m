@@ -2,6 +2,10 @@ function [deltaH throttle action] = teamsnipe(state, player, objects, req)
 
 eval('engine_settings');
 
+deltaH = 0;
+throttle = 0;
+action = '';
+
 pnum = player{6};
 team = player{5};
 matfile = ['teamsnipe-' team '.mat'];
