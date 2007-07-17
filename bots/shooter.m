@@ -14,14 +14,17 @@ engine_settings;
 
 datafile = ['shooter' player{5} num2str(player{6}) '.mat'];
 
-if strcmp(req,'preclean')
+if strcmp(req,'preclean')||strcmp(req,'clean')
     if exist(datafile,'file')
         delete(datafile)
     end
+    if strcmp(req,'preclean')
     targethist = [];
     oldtarget = 0;
     firecount = 0;
     save (datafile,'targethist','oldtarget','firecount')
+    end
+    return
 end
 
 load (datafile)
