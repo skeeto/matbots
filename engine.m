@@ -277,12 +277,12 @@ while ~term
                     if (friendly_fire)
                         if objects{i}{5} ~= state{j}{6}
                             hit = 1;
-                            add_log(objects{i}{6}, 'mine_hit', t, 1, '+')
+                            add_log(objects{i}{5}, 'mine_hit', t, 1, '+')
                         end
                     else
                         if ~strcmp(objects{i}{4}, state{j}{5})
                             hit = 1;
-                            add_log(objects{i}{6}, 'mine_hit', t, 1, '+')
+                            add_log(objects{i}{5}, 'mine_hit', t, 1, '+')
                         end
                     end
                 end
@@ -560,6 +560,7 @@ end
 
 if exist('mode', 'var')
     if strcmp(mode, 'init')
+        bots = [];
         % Initialize log structure
         for i = 1:pnum
             bots(i).name = log_field{i}{7};
@@ -588,7 +589,7 @@ if exist('mode', 'var')
                 end
             end
         end
-        save(log_file, 'bots');
+        save(log_file, 'bots', 't');
         disp(['Game log saved to ' log_file]);
         return;
     end
