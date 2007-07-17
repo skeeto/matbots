@@ -165,6 +165,10 @@ if isempty(impacttime)
     [targetx, targety] = aimnderiv(xpos,ypos,targethist,n);
 end
 
+if isempty(impacttime)
+    [targetx, targety] = targethist(size(targethist,1),:);
+end
+
 % if ~isempty(impacttime)
 % figure
 % plot(xhist,yhist,'r.')

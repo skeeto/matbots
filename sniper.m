@@ -75,16 +75,8 @@ end
 whichindex = find(abs(deltaHlist)==min(abs(deltaHlist)));
 target = listindex(whichindex);
 
-<<<<<<< .mine
 targetx = state{target}{1};
 targety = state{target}{2};
-=======
-if target~=oldtarget
-   abs(deltaHlist)
-   target
-end
-
->>>>>>> .r71
 dist = norm([state{target}{1}-xpos state{target}{2}-ypos]);
 
 %% Things to do when switching to a new target
@@ -95,21 +87,7 @@ if target~=oldtarget
 end
 oldtarget = target;
 
-<<<<<<< .mine
 %% Aiming
-=======
-if target>length(state)
-    throttle = 0;
-    deltaH = 0;
-    action = 'none';
-    
-    return
-end
-
-targetx = state{target}{1};
-targety = state{target}{2};
-
->>>>>>> .r71
 targethist = [targethist; targetx targety];
 if size(targethist,1)==3
     targethist(1,:) = [];
@@ -145,6 +123,4 @@ end
 %% Throttle Management
 throttle = (dist-rifle_radius)^2;
 
-<<<<<<< .mine
-save (datafile,'firecount','target','targethist','oldtarget')=======
-save (datafile,'firenumber','target','targethist')>>>>>>> .r71
+save (datafile,'firecount','target','targethist','oldtarget')

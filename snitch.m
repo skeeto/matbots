@@ -129,20 +129,14 @@ end
 
 end %snitch function
 
-<<<<<<< .mine
 function out = impact(bullet,xpos,ypos)
 
-=======
-function out = impact(bullet,x,y)
-
->>>>>>> .r71
 engine_settings;
 
 bh = bullet(3); %bullet's heading
 bx = bullet(1); %bullet's x position
 by = bullet(2); %bullet's y position
 
-<<<<<<< .mine
 %Handle vertical trajectories:
 if abs(bh)==pi/2;
     if sign(bh)>0
@@ -171,16 +165,6 @@ if abs(bh)==pi/2;
                 return
             end
         end
-=======
-dist = norm([x-bx y-by]);
-
-in = (bx>world(1))&&(bx<world(2))&&(by>world(3))&&(by<world(4));
-
-while in
-    if dist<rifle_radius
-        out = 1;
-        return
->>>>>>> .r71
     end
 end
 %end of handling vertical trajectories
@@ -203,7 +187,6 @@ if (by+rifle_radius<ypos)&&(sin(bh)<0)
     return
 end
 %end of checking to see if bullet has already passed by
-<<<<<<< .mine
 
 %Check only two closest bullet locations
 bxstep = rifle_speed*ts*cos(bh);
@@ -227,6 +210,4 @@ dist_upper = norm([xpos-upper_circle_x ypos-upper_circle_y]);
 
 out = (dist_lower<=rifle_radius)||(dist_upper<=rifle_radius);
 
-=======
->>>>>>> .r71
 end %function
