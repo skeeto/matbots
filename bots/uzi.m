@@ -4,28 +4,27 @@ clusternum = 1;
 
 engine_settings
 
-num = player{6};
-datafile = ['uzi' num2str(num) '.mat'];
+datafile = ['uzi' player{5} num2str(player{6}) '.mat'];
 
-if isempty(state)
+if strcmp(req,'preclean')||strcmp(req,'clean')
     if exist(datafile,'file')
-        delete (datafile)
+        delete(datafile)
     end
+    if strcmp(req,'preclean')
+        targethist = [];
+        save (datafile,'targethist')
+    end
+    return
 end
 
-if exist(datafile,'file') %if the .mat file exists
-    load(datafile)
-else  %initialize .mat file
-    targethist = [];
-    
-end
+load (datafile)
 
 xpos = player{1};
 ypos = player{2};
 health = player{3};
 energy = player{4};
 team = player{5};
-
+num = player{6};
 name = player{7};
 heading = player{8};
 h = heading;
