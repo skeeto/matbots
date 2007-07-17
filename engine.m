@@ -131,7 +131,8 @@ while ~term
             if strcmp(action,'rifle') && rifle_enable
                 if rifle_cost <= state{i}{4}
                     rifle = { 'rifle' ; state{i}{1} ; state{i}{2} ; ...
-                        state{i}{8} ; state{i}{5} };
+                        state{i}{8} ; state{i}{5} ; state{i}{6} ; ...
+                        state{i}{9} };
                     objects = [objects {rifle}];
                     state{i}{4} = state{i}{4}-rifle_cost;
                 end
@@ -240,7 +241,7 @@ while ~term
                 end
                 if hit
                     state{j}{3} = state{j}{3} - rifle_damage;
-                    eplot(state{j}{1},state{j}{2},'r*');
+                    eplot(state{j}{1} ,state{j}{2}, 'r*');
                     delqueue = [delqueue i];
                 end
             end
@@ -249,7 +250,8 @@ while ~term
             if ~valid
                 delqueue = [delqueue i];
             else
-                eplot(objects{i}{2},objects{i}{3},'.')
+                eplot(objects{i}{2}, objects{i}{3}, '.', ...
+                    'Color', objects{i}{7})
             end
         end
 
