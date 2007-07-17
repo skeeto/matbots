@@ -8,6 +8,7 @@ datafile = ['goosedat' player{5} '.mat'];
 
 
 if strcmp(req,'preclean')||strcmp(req,'clean')
+    sniper(state,player,objects,req)
     if exist(datafile,'file')
         delete(datafile)
     end
