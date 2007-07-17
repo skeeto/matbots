@@ -12,6 +12,7 @@ if strcmp(req,'preclean')||strcmp(req,'clean')
     if exist(datafile,'file')
         delete(datafile)
     end
+    if strcmp(req,'preclean')
     linked = 0;
     dist2 = 100;
     dist3 = 100;
@@ -22,6 +23,7 @@ if strcmp(req,'preclean')||strcmp(req,'clean')
     targethist = [];
     otherfile = [];
     save (datafile,'linked','dist2','dist3','leaderaction','leaderheading','leaderthrottle','targethist','otherfile')
+    end
     return
 end
 
