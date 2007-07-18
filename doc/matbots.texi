@@ -1,0 +1,497 @@
+\input texinfo    @c -*-texinfo-*-
+@c %**start of header
+@setfilename matbots.info
+@settitle A Matlab Bot Simulation Game
+@c %**end of header
+
+@copying
+
+Copyright @copyright{} 2007 Michael Abraham and Christopher Wellons
+
+@quotation 
+Verbatim copying and distribution of this entire document are
+permitted worldwide, without royalty, in any medium, provided this
+notice is preserved.
+@end quotation
+@end copying
+
+@titlepage
+@title A Matlab Bot Simulation Game
+@subtitle Official Manual and Guide
+@author Michael Abraham and Christopher Wellons
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top A Matlab Bot Simlation Game
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Preface::              An introduction
+* Setup::                Setting up a game
+* Programming Basics::   Basic bot information
+* Creating a Bot::       Writing a bot by example
+* Index::                Concept index
+@end menu
+
+@c Preface
+@node Preface
+@chapter Preface
+
+
+
+@c ---------------------------------------------------------------------
+@c Setup
+@node Setup
+@chapter Setup
+
+@menu
+* Invocation::         Invoking the engine
+* Engine Settings::    Game options and settings
+@end menu
+
+@c Invocation
+@node Invocation
+@section Invocation
+
+@cindex player list
+@cindex player_list.txt
+To set up a game, edit the file called @file{player_list.txt}. This
+file should contain a bot name and a bot team name on each line
+separated by space. For example,
+
+@example
+sniper red_team
+sniper red_team
+sniper red_team
+goose  blue_team
+goose  blue_team
+goose  blue_team
+@end example
+
+The above @file{player_list.txt} file would set up a game of three
+sniper bots on team "red_team" against three goose bots on team
+"blue_team".  Any combination of bots and teams is allowed.
+
+@cindex engine_settings.m
+@cindex settings
+@cindex engine settings
+The game options and settings are stored in
+@file{engine_settings.m}. This file is executed by the engine to
+obtain all in-game values. Bots may also use this to obtain the same
+information for use in its programming. @xref{Engine Settings}.
+
+@cindex engine.m
+To start a game, simply execute the file @file{engine.m},
+
+@example
+>> engine
+@end example
+
+@c Engine Settings
+@node Engine Settings
+@section Engine Settings
+
+@cindex engine_settings.m
+The file @code{engine_settings.m} stores all of the game settings and
+options that effect the gameplay, logging, and display. The following
+explains these different settings found in the above file.
+
+@menu
+* World Settings::     Settings that define the game world
+* Display Settings::   Settings that effect the graphics of the game
+* Player Settings::    Settings that directly effect players
+@end menu
+
+@c World Settings
+@node World Settings
+@subsection World Settings
+@cindex world settings
+
+@cindex world
+The size of the game map is given in a 1 by 4 vector called
+@code{world},
+
+@example
+world = [minX maxX minY maxY];
+@end example
+
+All activity, weapons, and bots must happen within this
+boundry. Nothing can exist outside these bounds.
+
+The time step of the engine is defined in the @code{ts} variable. A
+lower number will give more precision to the game but result in
+greater processing time to simulate the game.
+
+@cindex friendly fire
+@code{friendly_fire} enabled friendly fire for the game. With friendly
+fire turned on, bullets and mines will hurt fellow teammates in the
+game.
+
+@cindex player mask
+@cindex hiding player information
+@code{player_hide} is a vector of integers that masks values in the
+player state vector (@xref{Data Structures}.) Changing this can
+severly break many bots. It is suggested to leave this as @code{[8]},
+which will mask other player's headings.
+
+@cindex grouping teams
+@code{group_teams} decides how players are initially placed in the
+world. When enabled, players are grouped with their teams and the
+teams are placed evenly around the outside of the world.
+
+@code{group_teams_radius} determines the redius of the circle in which
+an entire team starts when @code{group_teams} is enabled. If this is
+set to 0, all teams members will be exactly on top of each other.
+
+@c Display Settings
+@node Display Settings
+@subsection Display Settings
+@cindex display settings
+
+
+@c Player Settings
+@node Player Settings
+@subsection Player Settings
+@cindex player settings
+
+
+@c ---------------------------------------------------------------------
+@c Programming Basics
+@node Programming Basics
+@chapter Programming Basics
+
+@menu
+* Data Structures::    Bot data stuctures
+* Bot Interface::      The interface between the engine and the bot
+* Actions::            Bot actions
+@end menu
+
+@c Data Structures
+@node Data Structures
+@section Data Structures
+
+@cindex state vector
+A bot's current state is completely described by its state vector.
+The state vector is stored as a 1 by 9 cell array. The values are
+stored in this order,
+
+@enumerate
+@item
+X-position (double precision)
+
+@item
+Y-position (double precision)
+
+@item
+Health (double precision)
+
+@item
+Energy (double precision)
+
+@item
+Team (string)
+
+@item
+Player number (integer)
+
+@item
+Bot Function (string)
+
+@item
+Heading (double precision)
+
+@item
+Color (integer vector)
+
+@end enumerate
+
+@cindex player position
+The x-position, y-position are straightforward: each is a floating
+point value between the defined world boundries, stored in
+@code{world}. These are Cartesian coordinated with the origin is on
+the bottom left and increasing values going right and up.
+
+@cindex health
+The health is a value between 0 and @code{health_max}. When a bot's
+health is 0, this bot is dead and is removed from the game.
+
+@cindex energy
+The bot's energy is the fuel used to execute most, if not all,
+actions: movement, shooting, dropping mines, self-destruct. Energy
+slowly regernates at the rate stored in @code{energy_regen}. If a
+bot's energy is zero, the bot probably cannot do anything but wait for
+energy to regenerate.
+
+The team is a string that identifies which team a bot is playing
+on. The team name is arbitrary and two bots are on the same team if
+their team names match. Teams share a common color.
+
+@cindex player number
+The player number is a @emph{unique} number assigned to each bot
+before the game begins. This number will never change during the
+course of a game. This means that if a bot dies, the player numbers
+are not adjusted. For example, there are four players at the beginning
+of a game, which are assigned numbers 1 through 4. When player number
+3 dies, the remaining players will be 1, 2, and 4. Player 4 is
+@emph{not} changed into player 3. Confusion on this point is a cause
+of many programming errors.
+
+The bot function is the name of the function that defines the
+bot. This is used by the engine to decide what function to call when
+running the simulation. It can also be used for organizing teams or
+targeting particularly dangerous enemies.
+
+The heading is a number between -pi and pi that describes the
+direction a bot is facing. A heading of 0 means that a bot is facing
+to the right, east, or the positive x direction.
+
+The color is simply the color that the engine is using to plot the
+bot. This is of very little use to bot programming.
+
+@c Bot Interface
+@node Bot Interface
+@section Bot Interface
+@cindex interface
+
+Bots are Matlab functions.  They accept four inputs and return three
+outputs,
+
+@example
+function [deltaH throttle action] = botname (state, player, objects, req)
+@end example
+
+@cindex state vector
+@code{state} is a 1 by n cell array. The n cells are state vectors for
+every @emph{other} living (or very recently living) bot in the
+game. To access the information in a cell array, you will probably
+want to use squiggly brackets.
+
+For example, if you were interested in the health of the 2nd bot in
+the list, you would want
+
+@example
+state@{2@}@{3@}
+@end example
+
+Note the use of squiggly brackets rather than parenthesis. Also note
+that this is not necessarily the health of player 2. Rather, this is
+the health of the second bot in the array. This could very well be
+player 13 if several bots have already died and have been removed from
+the player list. To get the player number of the second bot in the
+list, you would want to use
+
+@example
+state@{2@}@{6@}
+@end example
+
+The second argument @code{player} is the current bot's state vector
+(the 1 by 9 cell array). This means that @code{player@{1@}} is the
+current bot's x-position. @code{player@{2@}} is the current bot's
+y-position, etc.
+
+@c XXX note about chapter on objects
+@cindex objects
+@code{objects} is a cell array containing information about all the
+various objects that are in the playing field that are visible to the
+current bot. Each cell contains a state vector for an object. The
+first cell in each object state vector is the name of the type of
+object. See the chapter on objects for detailed information about
+different objects found in the game.
+
+@c XXX cross reference to chapter on requests
+@cindex requests
+@code{req} is a @var{request}. The engine uses this input to make
+requests to the bot. In normal gameplay, this will be an empty
+string. If the string is not empty, the bot should either perform the
+request action or do nothing at all. The most important @var{requests}
+are @code{preclean} and @code{clean}. These are used to tell the bot
+to clean up files and such before and after the game. See the chapter
+on @var{requests} to see what requests the game engine may make.
+
+@cindex well behaved
+A well behaved bot should always return three values. There are a few
+times when returning no values will not cause problems, but returning
+values will do not harm.
+
+@cindex heading
+@cindex deltaH
+@code{deltaH} is a @emph{change} in heading angle (in radians). This
+value turns the but by the given angle. This angle may only be between
+@code{-deltaH_max} and @code{deltaH_max}. Values exceeding these
+values will be silently trimmed. For example, if the current heading
+is pi/3 and the desired heading is pi/6, the deltaH would need to be
+-pi/6. 
+
+@cindex throttle
+@code{throttle} is a commanded speed. A positive throttle value
+represents motion in the direction of the heading. @code{throttle}
+should be a value between -1 and 1. A throttle value of 1 will move
+the bot at a speed of 1 unit per second. The energy per timestep
+required for a throttle setting of 1 is @code{move_cost}.
+
+@cindex action
+@code{action} is a string containing the bot @var{action} for this
+turn. @xref{Actions}.
+
+@c Actions
+@node Actions
+@section Actions
+@cindex actions
+
+@menu
+* Rifle::             Shooting a bullet
+* Mine::              Dropping a mine
+* Health to Energy::  Converting health to energy and vice-versa
+* Self Destruct::     Self destruction to harm others
+@end menu
+
+To perform no action at all, simply return @code{'none'} for
+@var{action}.
+
+@c Rifle
+@node Rifle
+@subsection Rifle
+@cindex rifle
+
+@code{'rifle'} fires a bullet along the bots next heading (current
+heading + @code{deltaH}). The speed of the bullet is:
+@code{rifle_speed}, radius of the bullet damage is
+@code{rifle_radius}, damage caused by a hit is @code{rifle_damage},
+and the energy required to fire a bullet is @code{rifle_cost}.
+
+Currently, the engine models a rifle shot by a straight line of
+tangent circles. This leaves significant gaps along the path that a
+bot may find itself in. This behavior may change in the future and it
+is encouraged to treat bullets as retangular envelopes along the path
+of the bullet.
+
+Bullets disappear after leaving the bounds of the world. They will
+also disappear after striking a target. If two targets are on top of
+eachother (or both within @code{rifle_radius}) both targets will be
+damaged. This allows a single rifle shot to damage more than one bot
+at a time.
+
+@c Mine
+@node Mine
+@subsection Mine
+@cindex mine
+
+@code{'mine'} drops a mine at the bot's current location. The mine
+explodes and disappears when a player comes within its detection
+radius, @code{mine_radius}. The blast radius (the distance where bots
+receive damage) is equal to the detection radius. The damage caused by
+a mine is @code{mine_damage}. The energy required to drop a mine is
+@code{mine_cost}.
+
+A mine sits passively on the ground until another bot who can be
+damaged by the mine comes too close. If no bot ever approaches the
+mine, the mine will sit there forever (or until the game ends). If two
+bots wander in range at the same time, they will both be hurt.
+
+@c Health to Energy
+@node Health to Energy
+@subsection Health to Energy
+@cindex health to energy transfer
+@cindex energy to health transfer
+@cindex transfer
+
+@code{'HtoE'} will convert health to energy. The amount converted is
+indicated by appending the amount to convert onto the action
+string. For example, to convert 10 health to energy, the action string
+would be @code{'HtoE10'}. The conversion rate between health and
+energy is stored in @code{health_energy_ratio}.
+
+Attemping to convert health into more energy than you can add is safe,
+i.e. a bot will not lose health when energy is maxed out. A bot
+@emph{can}, however, kill itself by transfering all health to energy.
+
+This process also works in reverse to convert energy to health. Do
+this by appending a negative number. For example, @code{'HtoE-8'} will
+convert energy into 8 health.
+
+@c Self Destruct
+@node Self Destruct
+@subsection Self Destruct
+@cindex suicide
+@cindex self destruct
+
+@code{'destruct'} will cause the bot to instantly die leaving behind
+an explosive with blast radius @code{destruct_radius}. This explosive
+will go off after a length of time @code{destruct_time}. Remember to
+take the time step into account. This means the explosive will go off
+in @code{destruct_time/ts} steps.
+
+Note that if the last remaining bot on a team does this, the team will
+be eliminated before the explosive goes off. This could mean the end
+of the game and the self destruct damage never happens.
+
+@c ---------------------------------------------------------------------
+@c Creating a Bot
+@node Creating a Bot
+@chapter Creating a Bot
+
+@menu
+* Initialization::     Gettings things started in the bot
+* Handling Requests::  How to handle requests from the engine
+* Example Bot::        Step by step example of writing a simple bot
+@end menu
+
+@c Initialization
+@node Initialization
+@section Initialization
+@cindex initialization
+
+@cindex boilerplate
+First, you should drop in the function boilerplate (with your bot's
+name) at the top of the file,
+
+@example
+function [deltaH throttle action] = bot_name (state, player, objects, req)
+@end example
+
+Replace @code{bot_name} with the name of your bot (and the m-file).
+
+@cindex engine_settings.m
+Every non-trivial bot should call @code{engine_settings} at the
+beginning of the bot's code. This will provide access to all of the
+game settings. This will allow you to write a bot that doesn't contain
+magic numbers or is tuned to any particular configuration.
+
+@c Handling Requests
+@node Handling Requests
+@section Handling Requests
+@cindex requests
+
+@c Example Bot
+@node Example Bot
+@section Example Bot
+@cindex example bot
+
+@c XXX Find somewhere for this
+IMPORTANT:
+The engine does the following things in the following order at each timestep:
+1) Changes your heading by deltaH
+2) Executes your action ('rifle', 'mine', etc)
+3) Moves your bot a distance of throttle*ts
+4) Moves objects and causes damages where necessary
+
+This means that your bot will change heading FIRST, fire a rifle SECOND (from
+current location), and move to a new location THIRD.
+
+@c End the manual with the index.
+@node Index
+@unnumbered Index
+
+@printindex cp   
+
+@bye
