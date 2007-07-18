@@ -40,6 +40,7 @@ notice is preserved.
 * Setup::                Setting up a game
 * Programming Basics::   Basic bot information
 * Creating a Bot::       Writing a bot by example
+* Bot Behavior::         Existing bots and bot etiquette 
 * Index::                Concept index
 @end menu
 
@@ -617,12 +618,90 @@ requests.
 @section Memory
 @cindex memory
 
+Memory involves saving varaibles that a bot may need later into a
+@file{.mat} file. This mat file should be unique for the bot, or at
+least the bot's team. If it isn't, the bot may interfere with enemy
+bots attempting to use the same file.
 
+Here is an example of memory being used to reduce the fire rate of the
+bot in the previous section,
+
+@example
+datafile = ['example-bot-' num2str(player{6}) '.mat'];
+
+if exist (datafile, 'file')
+    load (datafile);
+else
+    rifle_timer = 0;
+end
+
+% This code is from before
+deltaH = pi / 8;
+throttle = 0.8;
+
+% Do we shoot now?
+if rifle_timer > 20
+    % reset timer
+    rifle_timer = 0;
+
+    action = 'rifle';
+else
+    action = '';
+
+    % increase timer
+    rifle_timer = rifle_timer + 1;
+end
+
+save (datafile, 'rifle_timer');
+@end example
+
+@cindex unique filename
+The name for the bot will be unique, based on the player number. This
+will allow many of these bots in a single game without any of them
+using the same file. Before the bot finishes, it saves the data to the
+@file{.mat} file for the next turn.
+
+@cindex well behaved
+@cindex magic number
+There are two issues with this bot that prevents it from being a
+@emph{well behaved} and well written bot,
+
+@itemize
+@item
+It does not clean up after itself.
+
+@item
+It uses a magic number, 20.
+
+@end itemize
+
+The first issue is resolved by adding a check for the clean request,
+which should be placed just after @code{datafile} is set,
+
+@example
+if strcmp (req, 'clean') && exist (datafile, 'file')
+    delete (datafile);
+
+    % do nothing more
+    deltaH = 0;
+    throttle = 0;
+    action = '';
+    return;
+end
+@end example
+
+@c XXX xref apendix entry?
 
 @c Targeting
 @node Targeting
 @section Targeting
 @cindex targeting
+
+
+@c ---------------------------------------------------------------------
+@c Bot Behavior
+@node Bot Behavior
+@chapter Bot Behavior
 
 
 
