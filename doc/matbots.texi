@@ -1,7 +1,7 @@
 \input texinfo    @c -*-texinfo-*-
 @c %**start of header
 @setfilename matbots.info
-@settitle A Matlab Bot Simulation Game
+@settitle Matbots Manual
 @c %**end of header
 
 @copying
@@ -16,8 +16,8 @@ notice is preserved.
 @end copying
 
 @titlepage
-@title A Matlab Bot Simulation Game
-@subtitle Official Manual and Guide
+@title Matbots Manual
+@subtitle Official Manual and Bot Programming Guide
 @author Michael Abraham and Christopher Wellons
 
 @page
@@ -47,7 +47,7 @@ notice is preserved.
 @node Preface
 @chapter Preface
 
-
+@c write a preface!
 
 @c ---------------------------------------------------------------------
 @c Setup
@@ -174,6 +174,7 @@ set to 0, all teams members will be exactly on top of each other.
 * Data Structures::    Bot data stuctures
 * Bot Interface::      The interface between the engine and the bot
 * Actions::            Bot actions
+* Requests::           Engine requests
 @end menu
 
 @c Data Structures
@@ -267,7 +268,8 @@ Bots are Matlab functions.  They accept four inputs and return three
 outputs,
 
 @example
-function [deltaH throttle action] = botname (state, player, objects, req)
+function [deltaH throttle action] ...
+                          = botname (state, player, objects, req)
 @end example
 
 @cindex state vector
@@ -308,15 +310,13 @@ first cell in each object state vector is the name of the type of
 object. See the chapter on objects for detailed information about
 different objects found in the game.
 
-@c XXX cross reference to chapter on requests
 @cindex requests
 @code{req} is a @var{request}. The engine uses this input to make
 requests to the bot. In normal gameplay, this will be an empty
 string. If the string is not empty, the bot should either perform the
 request action or do nothing at all. The most important @var{requests}
 are @code{preclean} and @code{clean}. These are used to tell the bot
-to clean up files and such before and after the game. See the chapter
-on @var{requests} to see what requests the game engine may make.
+to clean up files and such before and after the game. @xref{Requests}.
 
 @cindex well behaved
 A well behaved bot should always return three values. There are a few
@@ -326,17 +326,17 @@ values will do not harm.
 @cindex heading
 @cindex deltaH
 @code{deltaH} is a @emph{change} in heading angle (in radians). This
-value turns the but by the given angle. This angle may only be between
+value turns by the given angle. This angle may only be between
 @code{-deltaH_max} and @code{deltaH_max}. Values exceeding these
 values will be silently trimmed. For example, if the current heading
 is pi/3 and the desired heading is pi/6, the deltaH would need to be
--pi/6. 
+-pi/6.
 
 @cindex throttle
 @code{throttle} is a commanded speed. A positive throttle value
 represents motion in the direction of the heading. @code{throttle}
 should be a value between -1 and 1. A throttle value of 1 will move
-the bot at a speed of 1 unit per second. The energy per timestep
+the bot at a speed of 1 world unit per second. The energy per timestep
 required for a throttle setting of 1 is @code{move_cost}.
 
 @cindex action
@@ -363,7 +363,7 @@ To perform no action at all, simply return @code{'none'} for
 @subsection Rifle
 @cindex rifle
 
-@code{'rifle'} fires a bullet along the bots next heading (current
+@code{'rifle'} fires a bullet along the bot's next heading (current
 heading + @code{deltaH}). The speed of the bullet is:
 @code{rifle_speed}, radius of the bullet damage is
 @code{rifle_radius}, damage caused by a hit is @code{rifle_damage},
@@ -435,15 +435,57 @@ Note that if the last remaining bot on a team does this, the team will
 be eliminated before the explosive goes off. This could mean the end
 of the game and the self destruct damage never happens.
 
+@c Requests
+@node Requests
+@section Requests
+@cindex requests
+
+Currently there are only two requests that the engine makes. There
+will be more in the future, which means that a bot should always
+return values and be prepared for unknown requests. Basically this
+means that ignoring unknown requests by returning empty or zero values
+when they come up.
+
+@menu
+* Clean and Preclean::    Bot pre-game and post-game cleanup
+@end menu
+
+@c Clean and Preclean
+@code Clean and Preclean
+@subsection Clean and Preclean
+
+@cindex preclean
+Before every game, the engine will send a @code{'preclean'} requests
+to every bot. The state vector (the first argument) will be empty,
+which may cause simple bots to declare victory. The player vector is
+provided as this may be important chosen filenames.
+
+Use this to prepare any data files that are needed for the game. More
+importantly, it allows the bot to clean up files that may be left over
+from previous games that may interfere.
+
+@cindex clean
+At the end of every game, the engine will send a @code{'clean'}
+request to each bot, again with an empty state vector but valid player
+vector. A well behaved bot removes its game files.
+
 @c ---------------------------------------------------------------------
 @c Creating a Bot
 @node Creating a Bot
 @chapter Creating a Bot
 
+This chapter will go through a step-by-step process of creating a
+simple seek and destroy bot that has memory. Even if you think you are
+ready to get started, you should take a look at this chapter to see
+how to avoid making come mistakes. It is also a guide on creating well
+behaved bots.
+
 @menu
-* Initialization::     Gettings things started in the bot
-* Handling Requests::  How to handle requests from the engine
-* Example Bot::        Step by step example of writing a simple bot
+* Initialization::        Gettings things started in the bot
+* Handling Requests::     How to handle requests from the engine
+* Moving and Shooting::   Moving and shooting
+* Memory::                Getting data from previous turns
+* Targeting::             Choosing a target
 @end menu
 
 @c Initialization
@@ -456,7 +498,8 @@ First, you should drop in the function boilerplate (with your bot's
 name) at the top of the file,
 
 @example
-function [deltaH throttle action] = bot_name (state, player, objects, req)
+function [deltaH throttle action] ...
+                          = bot_name (state, player, objects, req)
 @end example
 
 Replace @code{bot_name} with the name of your bot (and the m-file).
@@ -467,26 +510,121 @@ beginning of the bot's code. This will provide access to all of the
 game settings. This will allow you to write a bot that doesn't contain
 magic numbers or is tuned to any particular configuration.
 
+Another good idea is to set all of the outputs in the case that they
+are not set later before the function returns.
+
+@example
+deltaH = 0;
+throttle = 0;
+action = '';
+@end example
+
 @c Handling Requests
 @node Handling Requests
 @section Handling Requests
 @cindex requests
 
-@c Example Bot
-@node Example Bot
-@section Example Bot
-@cindex example bot
+Below is a boilerplate for handling requests,
 
-@c XXX Find somewhere for this
-IMPORTANT:
-The engine does the following things in the following order at each timestep:
-1) Changes your heading by deltaH
-2) Executes your action ('rifle', 'mine', etc)
-3) Moves your bot a distance of throttle*ts
-4) Moves objects and causes damages where necessary
+@example
+if isempty(req)
+        % Continue as normal
+elseif strcmp(req, 'preclean') 
+        % Initialize files and external data
+elseif strcmp(req, 'clean')
+        % Clean up any created files and external mess
+else
+        % Ignore (unknown request)
+        deltaH = 0;
+        throttle = 0;
+        action = '';
+        return;
+end
+@end example
 
-This means that your bot will change heading FIRST, fire a rifle SECOND (from
-current location), and move to a new location THIRD.
+Putting this near the top of the bot program will allow the bot to
+handle incoming requests before doing anything possibly
+unecessary. The above example handles @code{'clean'} and
+@code{'preclean'} while ignoring unknown requests.
+
+@xref{Requests}.
+
+@c Moving and Shooting
+@node Moving and Shooting
+@section Moving and Shooting
+@cindex movement
+@cindex shooting
+
+@cindex throttle
+Moving involves setting @code{throttle} to anything but 0. It is
+limited to -1 and 1, but values exceding these are silently
+trimmed. This may allow the bot logic to be more elegant and simple.
+
+@example
+throttle = 0.8;
+@end example
+
+For shooting, we will use the @code{'rifle'}. By setting @code{acton}
+to @code{'rifle'}, the bot fire a single shot along the bot's
+heading. If @code{action} always equals @code{'rifle'}, the bot will
+constantly fire.
+
+@example
+action = 'rifle';
+@end example
+
+When deciding how to shoot, it is important to note the order in which
+the engine will execute the bot actions,
+
+@cindex execution order
+@cindex order of execution
+@enumerate
+@item
+Changes heading by @code{deltaH}
+
+@item
+Executes the action (@code{rifle}, @code{mine}, etc.)
+
+@item
+Moves the bot a distance of @code{throttle * ts} along the new heading.
+
+@item
+Moves and evaluates objects, causing damages where necessary.
+
+@end enumerate
+
+If the return values are @code{[ -pi/8, 1, 'rifle' ]}, the bot will
+change heading @emph{first}, fire a rifle @emph{second} from the
+current location along the new heading, and move to a new location
+@emph{third}.
+
+So with the code below, we have a bot that goes in a circle and fires
+constantly (really it fires until it is out of energy). Copy any paste
+this into a new bot function to try it for yourself.
+
+@example
+deltaH = pi / 8;
+throttle = 0.8;
+action = 'rifle';
+@end example
+
+@cindex well behaved
+This simple bot is a @emph{well behaved} bot that will correctly handle all
+requests.
+
+@c Memory
+@node Memory
+@section Memory
+@cindex memory
+
+
+
+@c Targeting
+@node Targeting
+@section Targeting
+@cindex targeting
+
+
 
 @c End the manual with the index.
 @node Index
