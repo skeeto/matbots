@@ -12,6 +12,7 @@
 %   7  name
 %   8  heading
 %   9  color
+%   10 function handle
 %
 % Copyright (c) 2007 Michael Abraham and Christopher Wellons
 %
@@ -81,6 +82,7 @@ for i = 1:nplayers
     player{7} = playerdata{i,1};
     player{8} = rand*2*pi;
     player{9} = colorlist{mod(team - 1, length(colorlist)) + 1};
+    player{10} = eval(['@' player{7}]);
     state = [state {player}];
 end
 
@@ -92,7 +94,7 @@ for i = 1:length(state)
         end
     end
     try
-        feval(state{i}{7},[],pstate,[],'preclean');
+        state{i}{10}([],pstate,[],'preclean');
     catch
     end
 end
@@ -132,7 +134,7 @@ while ~term
 
             end
 
-            [deltaH throttle action] = feval(state{i}{7},ostate,pstate,objects,[]);
+            [deltaH throttle action] = state{i}{10}(ostate,pstate,objects,[]);
             deltaH = mod(deltaH + pi, 2*pi) - pi;
             if abs(deltaH)>deltaH_max
                 deltaH = deltaH_max*sign(deltaH);
@@ -391,7 +393,7 @@ for i = 1:length(dplist)
         end
     end
     try
-        feval(dplist{i}{7},[],pstate,[],'clean');
+        dplist{i}{10}([],pstate,[],'clean');
     catch
     end
 end

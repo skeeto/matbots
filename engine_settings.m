@@ -3,7 +3,7 @@
 world = [0 10 0 10];
 ts = 0.05;
 friendly_fire = 0;
-player_hide = [8];
+player_hide = [8 10];
 group_teams = 1;
 group_teams_radius = norm([world(1)-world(2) world(3)-world(4)]) / 10;
 
