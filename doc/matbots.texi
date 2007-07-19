@@ -40,7 +40,8 @@ preserved.
 * Setup::                Setting up a game
 * Programming Basics::   Basic bot information
 * Creating a Bot::       Writing a bot by example
-* Bot Behavior::         Existing bots and bot etiquette 
+* Bot Behavior::         Existing bots and bot etiquette
+* Appendix A::           A simple example bot
 * Index::                Concept index
 @end menu
 
@@ -48,7 +49,21 @@ preserved.
 @node Preface
 @chapter Preface
 
-@c write a preface!
+This game we have going here began as a small project by Michael
+Abraham. To kill some time, he wrote a program where one circle chased
+another circle around a plot. Chris Wellons suggested that the engine
+be extended to allow different bots to be written and plugged in.
+
+Eventually, these bots could do things like fire bullets and drop
+mine. People nearby began to notice the bots at war on our computer
+screens and became interested in writing a bot.
+
+By having these bots written in Matlab, you have all of Matlabs tools
+at your disposal. You can also interface with external tools as well,
+which means you could write your bot in C or C++ and make calls to
+your external program from Matlab.
+
+@c XXX write more and make it more interesting
 
 @c ---------------------------------------------------------------------
 @c Setup
@@ -640,7 +655,7 @@ Here is an example of memory being used to reduce the fire rate of the
 bot in the previous section,
 
 @example
-datafile = ['example-bot-' num2str(player{6}) '.mat'];
+datafile = ['example-bot-' num2str(player@{6@}) '.mat'];
 
 if exist (datafile, 'file')
     load (datafile);
@@ -735,12 +750,160 @@ Example}.
 @section Targeting
 @cindex targeting
 
+Continuing the use of the above code, we will add targeting to the
+code. There is no official targeting interface. A bot just picks a bot
+and sticks with it.
+
+This example will pick an enemy bot at random, remember that bot as a
+target, and pursue the bot until it is dead. The full code for this
+bot is available in the appendix. @ref{Targeting Bot}.
+
+We want to store our target in memory (the @code{.mat} file) so we
+know who we have targeted later. We will adjust the save command at
+the end of the code,
+
+@example
+save (datafile, 'rifle_timer', 'target');
+@end example
+
+We also want to initialize the target, so we will put this below the
+initialization of @code{rifle_timer},
+
+@example
+else
+    rifle_timer = 0;
+    target = -1;
+end
+@end example
+
+We set it to -1 because no bot will ever have this number. It will
+force the bot to choose a target right away.
+
+Let us now check to see if our current target is alive.
+
+@example
+target_index = -1;
+for i = 1:length(state)
+    if state{i}{6} == target
+        target_index = i;
+        break;
+    end
+end
+@end example
+
+
+If our target is dead, @code{target_index} was never set. In this
+case, let's choose a new target at random. To do this, we will need to
+create a list of enemy bots,
+
+@example
+enemy_list = [];
+enemy_index = [];
+for i = 1:length(state)
+    if ~strcmp(state@{i@}@{5@}, player@{5@});
+        enemy_list = [enemy_list state(i)];
+        enemy_index = [enemy_index i];
+    end
+end
+@end example
+
+If there are no enemies, we do nothing.
+
+@example
+   if isempty(enemy_list)
+       deltaH = 0;
+       throttle = 0;
+       action = '';
+       return;
+   end
+@end example
+
+@code{enemy_list} is now a non-empty list of enemies for us to choose
+from. Choose one at random,
+
+@example
+sel_index = ceil (rand * length(enemy_list));
+target = enemy_list@{sel_index@}@{6@};
+target_index = enemy_index(sel_index);
+@end example
+
+Now we have a target and know it's index into the state vector. Let's
+turn our bot to face this enemy at his current position. In this
+example, we will not attempt to predict enemy movement and shoot
+there. This is left up to you to solve. There are many different ways
+to solve this probem, some better than others.
+
+Calculate the heading required to face the other bot,
+
+@example
+target_heading = atan2(state@{target_index@}@{2@} - player@{2@}, ...
+                       state@{target_index@}@{1@} - player@{1@});
+@end example
+
+Now we set deltaH to this different, causing the bot to turn in the
+correct direction,
+
+@example
+deltaH = target_heading - player@{8@};
+@end example
+
+This completes our search and destroy bot. The full code is available
+in the appendix. @xref{Targeting Bot}.
 
 @c ---------------------------------------------------------------------
 @c Bot Behavior
 @node Bot Behavior
 @chapter Bot Behavior
 
+@menu
+* Well Behaved Bots::   Bot etiquette
+@end menu
+
+@c Well Behaved Bots
+@node Well Behaved Bots
+@section Well Behaved Bots
+@cindex well behaved
+
+To encourage bots that interface well with the engine and other bots,
+we will define a ``well behaved'' bot. A well behaved bot should,
+
+@itemize @bullet
+@item
+Be quiet.
+
+@item
+Always return three values.
+
+@item
+Properly handle all requests.
+
+@item
+Not intentionally sabotage other bots.
+
+@end itemize
+
+Now, to detail this information.
+
+A bot should not produce any junk output. This includes both output in
+the Matlab command line window as well as putting junk on the game
+window. Extra plotting on the game window is allowed, as long as it
+does not interfere with watching the game, i.e. don't fill the plot
+will garbage.
+
+A bot should always return three values, especially with unknown
+requests. This leads us into the next item.
+
+A bot should be able to take any request. If a request is not known,
+it should do nothing but return empty or zeroed values.
+
+And finally, a bot should not sabotage another bot. That is, a bot
+should only compete with another bot within the game
+engine. Attempting to modify another bot's @file{.mat} file would be a
+violation of this rule.
+
+Of course, your bot does not @emph{have} to be well behaved. This is a
+just a set of guidelines. The most intereting bots may not follow
+these guidelines at all.
 
 @c ---------------------------------------------------------------------
 @node Simple Example
@@ -750,7 +913,9 @@ Example}.
 function [deltaH throttle action] ...
                           = example_bot (state, player, objects, req)
 
-datafile = ['example-bot-' num2str(player{6}) '.mat'];
+engine_settings;
+
+datafile = ['example-bot-' num2str(player@{6@}) '.mat'];
 
 if strcmp (req, 'clean') && exist (datafile, 'file')
     delete (datafile);
@@ -787,6 +952,89 @@ end
 
 save (datafile, 'rifle_timer');
 
+@end example
+
+@c ---------------------------------------------------------------------
+@node Targeting Bot
+@appendix Targeting Bot
+
+@example
+function [deltaH throttle action] ...
+                          = target_bot (state, player, objects, req)
+
+engine_settings;
+
+datafile = ['target-bot-' num2str(player@{6@}) '.mat'];
+
+if strcmp (req, 'clean') && exist (datafile, 'file')
+    delete (datafile);
+
+    % do nothing more
+    deltaH = 0;
+    throttle = 0;
+    action = '';
+    return;
+end
+
+if exist (datafile, 'file')
+    load (datafile);
+else
+    rifle_timer = 0;
+    target = -1;
+end
+
+target_index = -1;
+for i = 1:length(state)
+    if state{i}{6} == target
+        target_index = i;
+        break;
+    end
+end
+
+if target_index == -1
+   enemy_list = [];
+   enemy_index = [];
+   for i = 1:length(state)
+       if ~strcmp(state@{i@}@{5@}, player@{5@});
+           enemy_list = [enemy_list state(i)];
+           enemy_index = [enemy_index i];
+       end
+   end
+   
+   if isempty(enemy_list)
+       deltaH = 0;
+       throttle = 0;
+       action = '';
+       return;
+   end
+   
+   sel_index = ceil (rand * length(enemy_list));
+   target = enemy_list@{sel_index@}@{6@};
+   target_index = enemy_index(sel_index);
+end
+
+% Now we set deltaH to point to this bot
+target_heading = atan2(state@{target_index@}@{2@} - player@{2@}, ...
+                       state@{target_index@}@{1@} - player@{1@});
+deltaH = target_heading - player@{8@};
+
+% Constant throttle
+throttle = 0.5;
+
+% Do we shoot now?
+if rifle_timer >= rifle_cost / (energy_regen - throttle * move_cost)
+    % reset timer
+    rifle_timer = 0;
+
+    action = 'rifle';
+else
+    action = '';
+
+    % increase timer
+    rifle_timer = rifle_timer + 1;
+end
+
+save (datafile, 'rifle_timer', 'target');
 @end example
 
 @c End the manual with the index.
