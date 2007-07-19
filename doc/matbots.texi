@@ -59,7 +59,7 @@ Eventually, these bots could do things like fire bullets and drop
 mines. People nearby began to notice the bots at war on our computer
 screens and became interested in writing bots.
 
-By having these bots written in Matlab, you have all of Matlabs tools
+By having these bots written in Matlab, you have all of Matlab's tools
 at your disposal. You can also interface with external tools as well,
 which means you could write your bot in C or C++ and make calls to
 your external program from Matlab.
@@ -176,6 +176,50 @@ set to 0, all teams members will be exactly on top of each other.
 @node Display Settings
 @subsection Display Settings
 @cindex display settings
+
+This section contains settings that effect the display of the world
+during the game as well as the recordings from that game. Changing
+these have no effect on the game, except maybe to cause it to take
+longer to play out.
+
+@code{heading_length} is the length of the line that shows a bot's
+heading. By default, this is set to scale by the world size so that
+the heading length will appear the same across different world sizes.
+
+@code{display_game} determines whether or not the game is displayed
+during the run. When disabled, the game will still run the same way
+but there will be no visual output.
+
+@cindex record
+The next two settings, @code{record_game} and @code{script_game},
+involve game recordings. These are two ways to record a game.
+
+@cindex record game
+When @code{record_game} is enabled, the game is captured using
+Matlab's @code{getframe} command. This means that when this option is
+set, @code{display_game} is also set, no matter what. This can be used
+to convert a game video into a movie file for play outside of Matlab.
+
+@cindex script game
+With @code{script_game}, the game display is dumped to an @var{m-file}
+by the name stored in @code{script_file}. This works by put all
+@code{plot} and @code{text} commands to an @var{m-file} along with all
+the data needed (@pxref{Bot Plotting}). This @var{m-file} can be
+played back from any instance of Matlab anywhere without the engine or
+any bots present. This means you can share the recording with anyone
+who has Matlab. Because it records plot commands, the ``video'' has
+infinite resolution and can be played back at any size without loss of
+quality.
+
+The scripted game also has built-in recording facilities, allowing it
+to be easily converted into a video file. To turn this on, edit the
+first line of the script to set @code{record_game} to 1 instead of
+0. All video data will be dumped to a variable called @code{watch}.
+
+In-game data can also be logged and this log data is placed into a
+structure called @code{bots} and stored in the file named in
+@code{log_file}. Logging is enabled with @code{log_game}.
+
 
 
 @c Player Settings
@@ -832,7 +876,7 @@ Now we have a target and know it's index into the state vector. Let's
 turn our bot to face this enemy at his current position. In this
 example, we will not attempt to predict enemy movement and shoot
 there. This is left up to you to solve. There are many different ways
-to solve this probem, some better than others.
+to solve this problem, some better than others.
 
 Calculate the heading required to face the other bot,
 
@@ -904,7 +948,7 @@ engine. Attempting to modify another bot's @file{.mat} file would be a
 violation of this rule.
 
 Of course, your bot does not @emph{have} to be well behaved. This is a
-just a set of guidelines. The most intereting bots may not follow
+just a set of guidelines. The most interesting bots may not follow
 these guidelines at all.
 
 @c Bot Plotting
@@ -912,13 +956,12 @@ these guidelines at all.
 @section Bot Plotting
 @cindex eplot
 
-@c XXX xref to record
 @cindex engine settings
 @cindex record
 Bots may draw plots and text in the game area through the @code{eplot}
 interface. @code{eplot} automatically checks the engine settings to
 determine how the plot is handled, if at all. The plot will also be
-recorded in the game script recording.
+recorded in the game script recording (@pxref{Display Settings}).
 
 @code{eplot} is able to do any plot that @code{plot} is capable of as
 well as inserting text with the @code{text} command. When using
@@ -945,7 +988,7 @@ some personality to a bot. To use it, the first argument is
 
 @cindex headshot
 @example
-explot ('text', player@{1@}, player@{2@} + 0.3, 'BOOM! HEADSHOT!');
+eplot ('text', player@{1@}, player@{2@} + 0.3, 'BOOM! HEADSHOT!');
 @end example
 
 Will display ``BOOM! HEADSHOT!'' over the bot.
