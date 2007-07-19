@@ -55,9 +55,18 @@ if length(varargin) == 1
     return;
 end
 
+% Check for text plot
+cmd = 'plot';
+plot_text = 0;
+if strcmp(varargin{1}, 'text')
+    cmd = 'text';
+    varargin(1) = [];
+    plot_text = 1;
+end
+
 % Avoid evaling a string
 done_plot = 0;
-if display_game || record_game
+if (display_game || record_game) && ~plot_text
     if nargin == 3
         plot(varargin{1}, varargin{2}, varargin{3});
         done_plot = 1;
@@ -72,7 +81,7 @@ end
 
 % Build plot string
 if (~done_plot && (display_game || record_game)) || script_game
-    plot_cmd = 'plot(';
+    plot_cmd = [cmd '('];
     for i = varargin
         i = i{1};
         if isnumeric(i)
