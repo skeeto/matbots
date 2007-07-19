@@ -1,3 +1,24 @@
+% A Matlab Bot Simulation Game
+%
+% See the included documentation for detailed information.
+%
+% The player state vector:
+%   1  xpos
+%   2  ypos
+%   3  health
+%   4  energy
+%   5  team
+%   6  num
+%   7  name
+%   8  heading
+%   9  color
+%
+% Copyright (c) 2007 Michael Abraham and Christopher Wellons
+%
+% Copying, modification, and distribution of this program is permitted 
+% worldwide, without royalty, in any medium, provided this notice is
+% preserved.
+%
 function out = engine(player_list_file)
 
 if exist('player_list_file', 'var')
@@ -9,31 +30,11 @@ end
 % Make bots visible to the engine
 addpath('bots');
 
-%1 xpos
-%2 ypos
-%3 health
-%4 energy
-%5 team
-%6 num
-%7 name
-%8 heading
-%9 color
-%
-% deltaH
-% throttle
-% action
-%
-% rifle
-% mine
-% shotgun
-% ping
-% suicide
-
 engine_settings;
 
+% Initialize the plotter
 eplot('init');
 
-term = 0;
 nplayers = size(playerdata,1);
 
 dplist = []; %dead player list
@@ -96,10 +97,11 @@ for i = 1:length(state)
     end
 end
 
-% Init log info
+% Initialize log info
 add_log(nplayers,state,[],[],'init');
 
-t = 0;
+t = 0;    % Time
+term = 0; % Game termination flag
 while ~term
     t = t + 1;
     eplot('clearframe'); % Clear the frame
