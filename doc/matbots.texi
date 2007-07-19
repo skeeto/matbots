@@ -9,9 +9,9 @@
 Copyright @copyright{} 2007 Michael Abraham and Christopher Wellons
 
 @quotation 
-Verbatim copying and distribution of this entire document are
-permitted worldwide, without royalty, in any medium, provided this
-notice is preserved.
+Copying, modification, and distribution of this document is permitted
+worldwide, without royalty, in any medium, provided this notice is
+preserved.
 @end quotation
 @end copying
 
@@ -30,7 +30,7 @@ notice is preserved.
 
 @ifnottex
 @node Top
-@top A Matlab Bot Simlation Game
+@top Matbots
 
 @insertcopying
 @end ifnottex
@@ -127,7 +127,7 @@ world = [minX maxX minY maxY];
 @end example
 
 All activity, weapons, and bots must happen within this
-boundry. Nothing can exist outside these bounds.
+boundary. Nothing can exist outside these bounds.
 
 The time step of the engine is defined in the @code{ts} variable. A
 lower number will give more precision to the game but result in
@@ -140,17 +140,19 @@ game.
 
 @cindex player mask
 @cindex hiding player information
+@cindex function handle
 @code{player_hide} is a vector of integers that masks values in the
 player state vector (@xref{Data Structures}.) Changing this can
-severly break many bots. It is suggested to leave this as @code{[8]},
-which will mask other player's headings.
+severely break many bots. It is suggested to leave this as @code{[8
+10]}, which will mask other player's headings and bot function
+handles.
 
 @cindex grouping teams
 @code{group_teams} decides how players are initially placed in the
 world. When enabled, players are grouped with their teams and the
 teams are placed evenly around the outside of the world.
 
-@code{group_teams_radius} determines the redius of the circle in which
+@code{group_teams_radius} determines the radius of the circle in which
 an entire team starts when @code{group_teams} is enabled. If this is
 set to 0, all teams members will be exactly on top of each other.
 
@@ -172,7 +174,7 @@ set to 0, all teams members will be exactly on top of each other.
 @chapter Programming Basics
 
 @menu
-* Data Structures::    Bot data stuctures
+* Data Structures::    Bot data structures
 * Bot Interface::      The interface between the engine and the bot
 * Actions::            Bot actions
 * Requests::           Engine requests
@@ -215,31 +217,34 @@ Heading (double precision)
 @item
 Color (integer vector)
 
+@item
+Bot function handle (function handle)
+
 @end enumerate
 
 @cindex player position
-The x-position, y-position are straightforward: each is a floating
-point value between the defined world boundries, stored in
+The @var{x-position} and @var{y-position} are straightforward: each is
+a floating point value between the defined world boundaries, stored in
 @code{world}. These are Cartesian coordinated with the origin is on
 the bottom left and increasing values going right and up.
 
 @cindex health
-The health is a value between 0 and @code{health_max}. When a bot's
-health is 0, this bot is dead and is removed from the game.
+The @var{health} is a value between 0 and @code{health_max}. When a
+bot's health is 0, this bot is dead and is removed from the game.
 
 @cindex energy
-The bot's energy is the fuel used to execute most, if not all,
+The bot's @var{energy} is the fuel used to execute most, if not all,
 actions: movement, shooting, dropping mines, self-destruct. Energy
-slowly regernates at the rate stored in @code{energy_regen}. If a
+slowly regenerates at the rate stored in @code{energy_regen}. If a
 bot's energy is zero, the bot probably cannot do anything but wait for
 energy to regenerate.
 
-The team is a string that identifies which team a bot is playing
+The @var{team} is a string that identifies which team a bot is playing
 on. The team name is arbitrary and two bots are on the same team if
 their team names match. Teams share a common color.
 
 @cindex player number
-The player number is a @emph{unique} number assigned to each bot
+The @var{player number} is a @emph{unique} number assigned to each bot
 before the game begins. This number will never change during the
 course of a game. This means that if a bot dies, the player numbers
 are not adjusted. For example, there are four players at the beginning
@@ -248,17 +253,25 @@ of a game, which are assigned numbers 1 through 4. When player number
 @emph{not} changed into player 3. Confusion on this point is a cause
 of many programming errors.
 
-The bot function is the name of the function that defines the
-bot. This is used by the engine to decide what function to call when
-running the simulation. It can also be used for organizing teams or
-targeting particularly dangerous enemies.
+@cindex function name
+The @var{bot function name} is the name of the function that defines
+the bot. This is used by the engine to decide what function to call
+when running the simulation. It can also be used for organizing teams
+or targeting particularly dangerous enemies.
 
-The heading is a number between -pi and pi that describes the
+@cindex heading
+The @var{heading} is a number between -pi and pi that describes the
 direction a bot is facing. A heading of 0 means that a bot is facing
 to the right, east, or the positive x direction.
 
-The color is simply the color that the engine is using to plot the
-bot. This is of very little use to bot programming.
+@cindex color
+The @var{color} is simply the color that the engine is using to plot
+the bot. This is of very little use to bot programming.
+
+@cindex function handle
+The @var{bot function handle} is the function handle that the engine
+uses to call the bot. This is not useful for bots and will generally
+not be available to bots in the state vectors.
 
 @c Bot Interface
 @node Bot Interface
@@ -373,12 +386,12 @@ and the energy required to fire a bullet is @code{rifle_cost}.
 Currently, the engine models a rifle shot by a straight line of
 tangent circles. This leaves significant gaps along the path that a
 bot may find itself in. This behavior may change in the future and it
-is encouraged to treat bullets as retangular envelopes along the path
+is encouraged to treat bullets as rectangular envelopes along the path
 of the bullet.
 
 Bullets disappear after leaving the bounds of the world. They will
 also disappear after striking a target. If two targets are on top of
-eachother (or both within @code{rifle_radius}) both targets will be
+each other (or both within @code{rifle_radius}) both targets will be
 damaged. This allows a single rifle shot to damage more than one bot
 at a time.
 
@@ -412,9 +425,9 @@ string. For example, to convert 10 health to energy, the action string
 would be @code{'HtoE10'}. The conversion rate between health and
 energy is stored in @code{health_energy_ratio}.
 
-Attemping to convert health into more energy than you can add is safe,
+Attempting to convert health into more energy than you can add is safe,
 i.e. a bot will not lose health when energy is maxed out. A bot
-@emph{can}, however, kill itself by transfering all health to energy.
+@emph{can}, however, kill itself by transferring all health to energy.
 
 This process also works in reverse to convert energy to health. Do
 this by appending a negative number. For example, @code{'HtoE-8'} will
@@ -482,7 +495,7 @@ how to avoid making come mistakes. It is also a guide on creating well
 behaved bots.
 
 @menu
-* Initialization::        Gettings things started in the bot
+* Initialization::        Getting things started in the bot
 * Handling Requests::     How to handle requests from the engine
 * Moving and Shooting::   Moving and shooting
 * Memory::                Getting data from previous turns
@@ -545,7 +558,7 @@ end
 
 Putting this near the top of the bot program will allow the bot to
 handle incoming requests before doing anything possibly
-unecessary. The above example handles @code{'clean'} and
+unnecessary. The above example handles @code{'clean'} and
 @code{'preclean'} while ignoring unknown requests.
 
 @xref{Requests}.
@@ -558,11 +571,11 @@ unecessary. The above example handles @code{'clean'} and
 
 @cindex throttle
 Moving involves setting @code{throttle} to anything but 0. It is
-limited to -1 and 1, but values exceding these are silently
+limited to -1 and 1, but values exceeding these are silently
 trimmed. This may allow the bot logic to be more elegant and simple.
 
 @example
-throttle = 0.8;
+throttle = 0.5;
 @end example
 
 For shooting, we will use the @code{'rifle'}. By setting @code{acton}
@@ -604,8 +617,8 @@ constantly (really it fires until it is out of energy). Copy any paste
 this into a new bot function to try it for yourself.
 
 @example
+throttle = 0.5;
 deltaH = pi / 8;
-throttle = 0.8;
 action = 'rifle';
 @end example
 
@@ -618,7 +631,7 @@ requests.
 @section Memory
 @cindex memory
 
-Memory involves saving varaibles that a bot may need later into a
+Memory involves saving variables that a bot may need later into a
 @file{.mat} file. This mat file should be unique for the bot, or at
 least the bot's team. If it isn't, the bot may interfere with enemy
 bots attempting to use the same file.
@@ -637,7 +650,7 @@ end
 
 % This code is from before
 deltaH = pi / 8;
-throttle = 0.8;
+throttle = 0.5;
 
 % Do we shoot now?
 if rifle_timer > 20
@@ -690,7 +703,32 @@ if strcmp (req, 'clean') && exist (datafile, 'file')
 end
 @end example
 
-@c XXX xref apendix entry?
+The second issue is resolved by using the actual values for the energy
+regeneration rate, @code{energy_regen} and the rifle energy cost,
+@code{rifle_cost}. We also want to take into account that we are
+moving (at cost @code{move_cost}) and the energy regeneration rate is
+lower. First, the bot needs to obtain these values,
+
+@example
+engine_settings;
+@end example
+
+Now use the values,
+
+@example
+if rifle_timer >= rifle_cost / (energy_regen - throttle * move_cost)
+    ...
+end
+@end example
+
+The bot will now fire at the same rate that its energy regenerates,
+helping ensure that it will never run out of energy. With certain
+settings, there may be issues with divide by zero and negative
+numbers. This is left as an exercise to the reader (because we don't
+feel like writing it out!).
+
+The full code for this bot is available in the appendix. @xref{Simple
+Example}.
 
 @c Targeting
 @node Targeting
@@ -704,6 +742,52 @@ end
 @chapter Bot Behavior
 
 
+@c ---------------------------------------------------------------------
+@node Simple Example
+@appendix Simple Example
+
+@example
+function [deltaH throttle action] ...
+                          = example_bot (state, player, objects, req)
+
+datafile = ['example-bot-' num2str(player{6}) '.mat'];
+
+if strcmp (req, 'clean') && exist (datafile, 'file')
+    delete (datafile);
+
+    % do nothing more
+    deltaH = 0;
+    throttle = 0;
+    action = '';
+    return;
+end
+
+if exist (datafile, 'file')
+    load (datafile);
+else
+    rifle_timer = 0;
+end
+
+% This code is from before
+deltaH = pi / 8;
+throttle = 0.5;
+
+% Do we shoot now?
+if rifle_timer >= rifle_cost / (energy_regen - throttle * move_cost)
+    % reset timer
+    rifle_timer = 0;
+
+    action = 'rifle';
+else
+    action = '';
+
+    % increase timer
+    rifle_timer = rifle_timer + 1;
+end
+
+save (datafile, 'rifle_timer');
+
+@end example
 
 @c End the manual with the index.
 @node Index
