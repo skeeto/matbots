@@ -40,7 +40,7 @@ preserved.
 * Setup::                Setting up a game
 * Programming Basics::   Basic bot information
 * Creating a Bot::       Writing a bot by example
-* Bot Behavior::         Existing bots and bot etiquette
+* Bot Behavior::         Bot features and etiquette
 * Simple Example::       A simple example bot
 * Targeting Bot::        Simple example extended for targeting
 * Index::                Concept index
@@ -227,6 +227,29 @@ structure called @code{bots} and stored in the file named in
 @subsection Player Settings
 @cindex player settings
 
+The player settings effect bots directly and are fairly simple
+settings. These control health, energy, and movement.
+
+@cindex energy
+@cindex health
+@code{energy_max} and @code{health_max} control the maximimum energy
+and health respectively. Generally, increasing health will make games
+longer and increasing energy will make games shorter.
+
+@code{energy_regen} control the energy regeneration rate. Setting this
+value to zero disables energy regeneration.
+
+@cindex movement
+@code{mode_cost} is the energy cost of moving a bot. The actual
+movement cost is a percentage of this value based on throttle. 50%
+throttle will use half of this energy and 100% throttle will use the
+entire @code{move_cost} amount.
+
+@cindex deltaH
+@code{deltaH_max} is the maximum amount of angular distance a bot can
+turn at once. Setting this to a low value will greatly reduce the
+movement capabilities of the bots. Setting this value high will make
+the games look boring (really!).
 
 @c ---------------------------------------------------------------------
 @c Programming Basics
@@ -238,6 +261,7 @@ structure called @code{bots} and stored in the file named in
 * Bot Interface::      The interface between the engine and the bot
 * Actions::            Bot actions
 * Requests::           Engine requests
+* Objects::            Objects found in the game
 @end menu
 
 @c Data Structures
@@ -542,6 +566,104 @@ from previous games that may interfere.
 At the end of every game, the engine will send a @code{'clean'}
 request to each bot, again with an empty state vector but valid player
 vector. A well behaved bot removes its game files.
+
+@c Objects
+@node Objects
+@section Objects
+@cindex objects
+
+Currently, all bots can see all objects in the game field, which
+includes the bullets from @code{'rifle'} shots. This means a bot can
+dodge bullets if it is clever enough.
+
+@cindex state vector
+All object state vectors (@pxref{Data Structures}) begin with the name
+of the object.
+
+@menu
+* Rifle Object::     Bullets in the battlefield
+* Mine Object::      Mines dropped by players
+@end menu
+
+@c Rifle Object
+@node Rifle Object
+@subsection Rifle Object
+@cindex rifle
+
+The rifle state vector looks like this,
+
+@enumerate
+@item
+Object name (@code{'rifle'})
+
+@item
+X position
+
+@item
+Y position
+
+@item
+Heading
+
+@item
+Team
+
+@item
+Player
+
+@item
+Color
+
+@end enumerate
+
+The bullet is at (@var{x-position}, @var{y-position}) and moving in
+direction @var{heading}. The shot was fired by @var{player} and
+belongs to team @var{team}. When @code{friendly_fire} (@pxref{World
+Settings}) is on, the team field is ignored by the engine. The
+@var{color} value may be useful with @code{eplot} (@pxref{Bot
+Plotting}).
+
+@c Mine Object
+@node Mine Object
+@subsection Mine Object
+@cindex mines
+
+A mine is basically a bullet that does not move. Or, perhaps, a bullet
+is a mine that moves. Here is the state vector,
+
+@enumerate
+@item
+Object name (@code{'mine'})
+
+@item
+X position
+
+@item
+Y position
+
+@item
+Team
+
+@item
+Player
+
+@item
+Reserved
+
+@item
+Color
+
+@end enumerate
+
+The mine is located at (@var{x-position}, @var{y-position}), belongs
+to team @var{team} and bot @var{player}. If @code{friendly_fire}
+(@pxref{World Settings}) is on, the @var{team} field is ignored by the
+engine. The @var{reserved} field was originally reserved as a list of
+bots that can see the mine. This is not implemented and this field is
+empty for now.
+
+The @var{color} value may be useful with @code{eplot} (@pxref{Bot
+Plotting}).
 
 @c ---------------------------------------------------------------------
 @c Creating a Bot
