@@ -99,6 +99,21 @@ for i = 1:length(state)
     end
 end
 
+% Ask each bot its plot preference
+bot_plot = ones(1, length(state));
+for i = 1:length(state)
+    for j = 1:length(state)
+        if state{i}{6} == state{j}{6}
+            pstate = state{j};
+        end
+    end
+    try
+        [deltaH throttle action] = state{i}{10}([],pstate,[],'selfplot');
+		bot_plot(i) = ~strcmp(action, 'selfplot');
+	catch
+    end
+end
+
 % Initialize log info
 add_log(nplayers,state,[],[],'init');
 
@@ -208,13 +223,15 @@ while ~term
                 checkbounds(state{i}{1},state{i}{2},world);
 
 			% Plot bot
-            eplot(...
-				cos(0:.1:2*pi+.2)*0.125 + state{i}{1}, ...
-				sin(0:.1:2*pi+.2)*0.125 + state{i}{2}, ...
-				'Color', state{i}{9});
-            eplot([state{i}{1} state{i}{1} + cos(state{i}{8}) * heading_length], ...
-                [state{i}{2} state{i}{2} + sin(state{i}{8}) * heading_length], ...
-                'Color', state{i}{9});
+			if bot_plot(i)
+				eplot(...
+					cos(0:.1:2*pi+.2)*0.125 + state{i}{1}, ...
+					sin(0:.1:2*pi+.2)*0.125 + state{i}{2}, ...
+					'Color', state{i}{9});
+				eplot([state{i}{1} state{i}{1} + cos(state{i}{8}) * heading_length], ...
+					[state{i}{2} state{i}{2} + sin(state{i}{8}) * heading_length], ...
+					'Color', state{i}{9});
+			end
             
             if display_health
                 f = bar_stack_offset * display_energy;
@@ -236,7 +253,8 @@ while ~term
     end %for players
 
     dplist = [dplist state(dpqueue)];
-    state(dpqueue)=[];
+    state(dpqueue) = [];
+	bot_plot(dpqueue) = [];
     nplayers = length(state);
 
     % Iterate through object list
