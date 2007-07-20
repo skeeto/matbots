@@ -48,7 +48,7 @@ preserved.
 
 @c Preface
 @node Preface
-@chapter Preface
+@unnumbered Preface
 
 @c boring as hell!!! fix this
 @c XXX write more and make it more interesting
