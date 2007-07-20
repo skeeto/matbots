@@ -598,13 +598,19 @@ if strcmp(req, 'selfdraw')
 end
 @end example
 
+The bot's drawing should generally remain inside of a 0.25 by 0.25
+area, or within radius of 0.125. For visibility purposes, the heading
+line may extend beyond this limit, just as the @code{heading_length}
+probably does. But do not let these boundaries interrupt creative
+juices, of course!
+
 @cindex radial
 If the bot's drawing shape is not going to be radial (like the default
 circle shape), it would be wise for the bot to rotate its drawing to
 match its new heading. This can be done with a rotation
 transformation,
 
-@cindex rotation trasformation
+@cindex rotation transformation
 @cindex rotation
 @example
 rotation_matrix = [ cos(heading) -sin(heading)  ; ...
@@ -614,7 +620,7 @@ rotation_matrix = [ cos(heading) -sin(heading)  ; ...
 If the bot's drawing vectors are stored in @code{x} and @code{y},
 
 @example
-rotated_vectors = rotatation_matrix * [ x ; y ];
+rotated_vectors = rotation_matrix * [ x ; y ];
 @end example
 
 And then we just plot this,
