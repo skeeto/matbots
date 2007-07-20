@@ -243,8 +243,9 @@ settings. These control health, energy, and movement.
 and health respectively. Generally, increasing health will make games
 longer and increasing energy will make games shorter.
 
-@code{energy_regen} control the energy regeneration rate. Setting this
-value to zero disables energy regeneration.
+@code{energy_regen} and @code{health_regen} control the energy and
+health regeneration rates. Setting these values to zero disables the
+respective regeneration ability.
 
 @cindex movement
 @code{mode_cost} is the energy cost of moving a bot. The actual
