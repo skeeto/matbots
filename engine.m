@@ -115,13 +115,11 @@ while ~term
         add_log(state{i}{6}, 'health', t, state{i}{3});
         add_log(state{i}{6}, 'energy', t, state{i}{4});
 
-        if state{i}{3}>0
-            state{i}{4} = state{i}{4} + energy_regen;
-            if state{i}{4}>energy_max
-                state{i}{4} = energy_max;
-            end
+        if state{i}{3} > 0
+            state{i}{4} = min(energy_max, state{i}{4} + energy_regen);
+            state{i}{3} = min(health_max, state{i}{3} + health_regen);
 
-            ostate = [];
+			ostate = [];
             for j = 1:nplayers
                 if state{i}{6} == state{j}{6}
                     pstate = state{j};

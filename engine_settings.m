@@ -27,10 +27,11 @@ bar_stack_offset = norm([world(1) - world(2) world(3) - world(4)])/200;
 
 %--------------------------------------------------------------------------
 % Player settings
+health_max = 100;
+health_regen = 0;
 energy_max = 100;
 energy_regen = 0.2;
 move_cost = 0.1;
-health_max = 100;
 deltaH_max = pi/4;
 
 %--------------------------------------------------------------------------
