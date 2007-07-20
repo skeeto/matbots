@@ -1030,6 +1030,7 @@ This completes our search and destroy bot. For the full code, see
 @menu
 * Well Behaved Bots::   Bot etiquette
 * Bot Plotting::        Bots plotting in the game area
+* Existing Bots::       Useful bots
 @end menu
 
 @c Well Behaved Bots
@@ -1119,6 +1120,94 @@ eplot ('text', player@{1@}, player@{2@} + 0.3, 'BOOM! HEADSHOT!');
 @end example
 
 Will display ``BOOM! HEADSHOT!'' over the bot.
+
+@c Existing Bots
+@node Existing Bots
+@section Existing Bots
+
+Several bots are already be written, some of which should be useful in
+debugging and testing the bots that you are writing. Other good for
+studying techniques to be used in your bots.
+
+@menu
+* Target Dummies::    Bots good for shooting
+* Team Bots::         Bots that behave as a collective
+* Evasion Bots::      Bots that work well alone
+@end menu
+
+@c Target Dummies
+@node Target Dummies
+@subsection Target Dummies
+@cindex target dummies
+
+This collection of bots are great for testing your bots, especially
+targeting algorithms. Until you have polished your bot, these will be
+often be the enemy.
+
+@cindex zombie
+The @dfn{zombie} bot travels in a straight line until it reaches the
+edge of the map, where it will ``bounce'' off in some other
+direction. It works well for early target practice to make sure your
+bot can hit targets moving in straight lines. They are also useful for
+testing your bots against opponents from all around the game area, as
+these bots will quickly be all over the place.
+
+The @dfn{circler} does what its name indicates: it goes in
+circles. Use this bot to test targeting algorithms because circular
+motion can actually be tricky to hit unless specifically programmed
+for it.
+
+The @dfn{dummy} bot is another good bot for target practice. Their
+movement is completely erratic, with all return values random. This
+bot will even shoot randomly.
+
+The @dfn{minelayer} is a zombie that drops mines. Drop in several and
+the game are will be filled with mines. They turn into a dummy bot
+when low on energy. If you are testing your bot on avoiding mines, use
+this guy.
+
+@c Team Bots
+@node Team Bots
+@subsection Team Bots
+
+These bots communicate with each other and will work together as a
+group to achieve goals.
+
+The @dfn{teamsnipe} bot does not move. They stand in place, all agree
+on a common target, and fire in unison as a team until that target
+dies.
+
+The @dfn{fallback} bot will ``fall back'' into formation in the
+nearest corner of the game area. Most will act as a defensive shield
+while the inside bots will concentrate on firing on targets (just by
+calling teamsnipe).
+
+The @dfn{goose} bot will fly in formation with the other geese on the
+team. They gather into a V (or really a triangle) and attack a common
+target while closing in. A seek and destroy group.
+
+The @dfn{uzi} bot is the most deadly bot ever created. These guys will
+work as a team to quickly eliminate several other bots in the first
+few seconds of the game.
+
+@c Evasion Bots
+@node Evasion Bots
+@subsection Evasion Bots
+
+Evasion bots tend to work alone. Their main feature is evading bullets
+fired from other bots, giving them huge survivability. They can easily
+take on many of the above bots at once and win. These are the best
+bots in the game right now.
+
+The @dfn{evader} bot, being first of its kind, is extremely passive
+and holds no grudges. It will quietly dodge anything thrown at it. It
+does need privacy, however. If someone gets too close, all hell will
+break loose as it unloads all of its energy on the rude bot.
+
+The @dfn{snitch} is currently the number one bot, but it requires
+immense CPU time compared to other bots. It will dodge just about
+anything you can throw at it and can quickly eliminate other opponents
+early on. Currently, however, the snitch is no good at close combat.
 
 @c ---------------------------------------------------------------------
 @node Simple Example
