@@ -50,6 +50,9 @@ preserved.
 @node Preface
 @chapter Preface
 
+@c boring as hell!!! fix this
+@c XXX write more and make it more interesting
+
 This game we have going here began as a small project by Michael
 Abraham. To kill some time, he wrote a program where one circle chased
 another circle around a plot. Chris Wellons suggested that the engine
@@ -63,8 +66,6 @@ By having these bots written in Matlab, you have all of Matlab's tools
 at your disposal. You can also interface with external tools as well,
 which means you could write your bot in C or C++ and make calls to
 your external program from Matlab.
-
-@c XXX write more and make it more interesting
 
 @c ---------------------------------------------------------------------
 @c Setup
@@ -220,7 +221,13 @@ In-game data can also be logged and this log data is placed into a
 structure called @code{bots} and stored in the file named in
 @code{log_file}. Logging is enabled with @code{log_game}.
 
-
+The game also supports putting health and energy bars above
+players. These are controlled by the remaining
+settings. @code{display_health} and @code{display_energy} controls
+whether these bars are visible or not. The other three settings,
+@code{bar_length}, @code{bar_offset}, and @code{bar_stack_offset}
+controls the look of the bars: length, distance from each other,
+distance from player, respectively.
 
 @c Player Settings
 @node Player Settings
@@ -232,7 +239,7 @@ settings. These control health, energy, and movement.
 
 @cindex energy
 @cindex health
-@code{energy_max} and @code{health_max} control the maximimum energy
+@code{energy_max} and @code{health_max} control the maximum energy
 and health respectively. Generally, increasing health will make games
 longer and increasing energy will make games shorter.
 
@@ -376,7 +383,7 @@ every @emph{other} living (or very recently living) bot in the
 game. To access the information in a cell array, you will probably
 want to use squiggly brackets.
 
-For example, if you were interested in the health of the 2nd bot in
+For example, if you were interested in the health of the second bot in
 the list, you would want
 
 @example
@@ -399,14 +406,12 @@ The second argument @code{player} is the current bot's state vector
 current bot's x-position. @code{player@{2@}} is the current bot's
 y-position, etc.
 
-@c XXX note about chapter on objects
 @cindex objects
 @code{objects} is a cell array containing information about all the
 various objects that are in the playing field that are visible to the
 current bot. Each cell contains a state vector for an object. The
 first cell in each object state vector is the name of the type of
-object. See the chapter on objects for detailed information about
-different objects found in the game.
+object. For details on objects, @ref{Objects}.
 
 @cindex requests
 @code{req} is a @var{request}. The engine uses this input to make
@@ -761,7 +766,7 @@ simple.
 throttle = 0.5;
 @end example
 
-For shooting, we will use the @code{'rifle'}. By setting @code{acton}
+For shooting, we will use the @code{'rifle'}. By setting @code{action}
 to @code{'rifle'}, the bot fire a single shot along the bot's
 heading. If @code{action} always equals @code{'rifle'}, the bot will
 constantly fire.
