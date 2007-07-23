@@ -513,7 +513,12 @@ bots wander in range at the same time, they will both be hurt.
 indicated by appending the amount to convert onto the action
 string. For example, to convert 10 health to energy, the action string
 would be @code{'HtoE10'}. The conversion rate between health and
-energy is stored in @code{health_energy_ratio}.
+energy is stored in @code{health_energy_ratio}. You might code it as,
+
+@example
+% Convert 10 health to energy
+action = ['HtoE' num2str(10)];
+@end example
 
 Attempting to convert health into more energy than you can add is safe,
 i.e. a bot will not lose health when energy is maxed out. A bot
