@@ -556,7 +556,7 @@ when they come up.
 
 @menu
 * Clean and Preclean::    Bot pre-game and post-game cleanup
-* Selfdraw::              Bots that can draw themselves
+* Selfplot::              Bots that can draw themselves
 @end menu
 
 @c Clean and Preclean
@@ -578,23 +578,23 @@ At the end of every game, the engine will send a @code{'clean'}
 request to each bot, again with an empty state vector but valid player
 vector. A well behaved bot removes its game files.
 
-@c Selfdraw
-@node Selfdraw
-@subsection Selfdraw
-@cindex selfdraw
+@c Selfplot
+@node Selfplot
+@subsection Selfplot
+@cindex selfplot
 
 @cindex eplot
-The @code{'selfdraw'} request is a query to the bot about drawing
+The @code{'selfplot'} request is a query to the bot about drawing
 preference. That is, if the bot responds with a yes, the bot indicates
 that it would like to handle its own drawing routines with
 @code{eplot} (@pxref{Bot Plotting}).
 
 To reply with a yes, the @code{action} field must be equal to
-@code{'selfdraw'}, the same as the request. The simplest way to
+@code{'selfplot'}, the same as the request. The simplest way to
 respond in the positive is,
 
 @example
-if strcmp(req, 'selfdraw')
+if strcmp(req, 'selfplot')
     deltaH = 0;
     throttle = 0;
     action = req;
