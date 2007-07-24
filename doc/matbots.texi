@@ -220,6 +220,11 @@ In-game data can also be logged and this log data is placed into a
 structure called @code{bots} and stored in the file named by
 @code{log_file}. Logging is enabled with @code{log_game}.
 
+@code{silent_bots} will quietly disable bot @code{eplot} commands. All
+bots will be drawn as normal little circles with heading lines. This
+is reflected in game recordings as well. Use this if you want to
+battle loud and colorful bots with a cleaner looking game.
+
 The game also supports putting health and energy bars above
 players. These are controlled by the remaining
 settings. @code{display_health} and @code{display_energy} controls
