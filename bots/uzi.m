@@ -6,7 +6,12 @@ engine_settings
 
 datafile = ['uzi' player{5} num2str(player{6}) '.mat'];
 
-if strcmp(req,'preclean')||strcmp(req,'clean')
+if strcmp(req,'selfplot')
+    throttle = 0;
+    deltaH = 0;
+    action = req;
+    return
+elseif strcmp(req,'preclean')||strcmp(req,'clean')
     if exist(datafile,'file')
         delete(datafile)
     end
@@ -29,6 +34,13 @@ name = player{7};
 heading = player{8};
 h = heading;
 nothers = size(state,2);
+
+if energy<10
+    action = ['HtoE' num2str(health-10)];
+    deltaH = 0;
+    throttle = 0;
+    return
+end
 
 targetlist = [];
 teamlist = [];
@@ -72,7 +84,6 @@ targety = state{target}{2};
 
 dist = norm([state{target}{1}-xpos state{target}{2}-ypos]);
 
-
 targethist = [targethist; targetx targety];
 if size(targethist,1)==3
     targethist(1,:) = [];
@@ -88,6 +99,14 @@ deltaH = aim-heading;
 deltaH = mod(deltaH+pi,2*pi)-pi;
 
 throttle = 0;
-action = 'rifle';
+if mod(heading+deltaH-atan2(targety-ypos,targetx-xpos),2*pi)==0
+    action = 'rifle';
+else
+    action = 'none';
+end
+
+if strcmp('uzi',player(7))
+    drawface(xpos+ts*throttle*cos(heading+deltaH),ypos+ts*throttle*sin(heading+deltaH),heading+deltaH,.16,player{9});
+end
 
 save (datafile,'targethist')
