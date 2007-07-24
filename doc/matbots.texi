@@ -151,7 +151,7 @@ lower number will give more precision to the game but result in
 greater processing time to simulate the game.
 
 @cindex friendly fire
-@code{friendly_fire} enabled friendly fire for the game. With friendly
+@code{friendly_fire} enables friendly fire for the game. With friendly
 fire turned on, bullets and mines will hurt fellow teammates in the
 game.
 
@@ -202,15 +202,14 @@ set, @code{display_game} is also set, no matter what. This can be used
 to convert a game video into a movie file for play outside of Matlab.
 
 @cindex script game
-With @code{script_game}, the game display is dumped to an @var{m-file}
-by the name stored in @code{script_file}. This works by put all
-@code{plot} and @code{text} commands to an @var{m-file} along with all
-the data needed (@pxref{Bot Plotting}). This @var{m-file} can be
-played back from any instance of Matlab anywhere without the engine or
-any bots present. This means you can share the recording with anyone
-who has Matlab. Because it records plot commands, the ``video'' has
-infinite resolution and can be played back at any size without loss of
-quality.
+With @code{script_game}, the game display is dumped to an m-file by
+the name stored in @code{script_file}. This works by putting all
+@code{plot} and @code{text} commands to an m-file along with all the
+data needed (@pxref{Bot Plotting}). This m-file can be played back
+from any instance of Matlab anywhere without the engine or any bots
+present. This means you can share the recording with anyone who has
+Matlab. Because it records plot commands, the ``video'' has infinite
+resolution and can be played back at any size without loss of quality.
 
 The scripted game also has built-in recording facilities, allowing it
 to be easily converted into a video file. To turn this on, edit the
@@ -218,7 +217,7 @@ first line of the script to set @code{record_game} to 1 instead of
 0. All video data will be dumped to a variable called @code{watch}.
 
 In-game data can also be logged and this log data is placed into a
-structure called @code{bots} and stored in the file named in
+structure called @code{bots} and stored in the file named by
 @code{log_file}. Logging is enabled with @code{log_game}.
 
 The game also supports putting health and energy bars above
@@ -248,7 +247,7 @@ health regeneration rates. Setting these values to zero disables the
 respective regeneration ability.
 
 @cindex movement
-@code{mode_cost} is the energy cost of moving a bot. The actual
+@code{move_cost} is the energy cost of moving a bot. The actual
 movement cost is a percentage of this value based on throttle. 50%
 throttle will use half of this energy and 100% throttle will use the
 entire @code{move_cost} amount.
