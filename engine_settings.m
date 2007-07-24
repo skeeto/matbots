@@ -17,6 +17,7 @@ script_file = 'script_record.m';
 log_game = 1;
 log_file = 'game_log.mat';
 explosion_steps = 5;
+silent_bots = 0;
 
 % Display bars
 display_health = 1;

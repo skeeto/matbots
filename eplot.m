@@ -7,6 +7,17 @@ engine_settings;
 global watch;
 global script_fid;
 
+num_argin = nargin;
+
+if strcmp(varargin{1}, 'engine')
+    varargin(1) = [];
+    num_argin = num_argin - 1;
+else
+    if silent_bots
+        return;
+    end
+end
+
 if length(varargin) == 1
     if strcmp(varargin{1}, 'init')
         if record_game
@@ -71,13 +82,13 @@ end
 % Avoid evaling a string
 done_plot = 0;
 if (display_game || record_game) && ~not_plot
-    if nargin == 3
+    if num_argin == 3
         plot(varargin{1}, varargin{2}, varargin{3});
         done_plot = 1;
-    elseif nargin == 4
+    elseif num_argin == 4
         plot(varargin{1}, varargin{2}, varargin{3}, varargin{4});
         done_plot = 1;
-    elseif nargin == 5
+    elseif num_argin == 5
         plot(varargin{1}, varargin{2}, varargin{3}, varargin{4}, varargin{5});
         done_plot = 1;
     end

@@ -34,7 +34,7 @@ addpath('bots');
 engine_settings;
 
 % Initialize the plotter
-eplot('init');
+eplot('engine', 'init');
 
 nplayers = size(playerdata,1);
 
@@ -121,7 +121,7 @@ t = 0;    % Time
 term = 0; % Game termination flag
 while ~term
     t = t + 1;
-    eplot('clearframe'); % Clear the frame
+    eplot('engine', 'clearframe'); % Clear the frame
     dpqueue = [];
     for i = 1:nplayers
         add_log(state{i}{6}, 'xpos', t, state{i}{1});
@@ -195,7 +195,7 @@ while ~term
                 add_log(state{i}{6}, 'HtoE', t, hamt, '+');
                 state{i}{3} = state{i}{3} - hamt;
                 state{i}{4} = state{i}{4} - eamt;
-                eplot(state{i}{1}, state{i}{2}, 'x', 'Color', [0 1 0]);
+                eplot('engine', state{i}{1}, state{i}{2}, 'x', 'Color', [0 1 0]);
                 % self-destruct
             elseif strcmp(action, 'destruct') && destruct_enable
                 if destruct_cost <= state{i}{4}
@@ -223,25 +223,26 @@ while ~term
                 checkbounds(state{i}{1},state{i}{2},world);
 
 			% Plot bot
-			if bot_plot(i)
-				eplot(...
+			if bot_plot(i) || silent_bots
+				eplot('engine', ...
 					cos(0:.1:2*pi+.2)*0.125 + state{i}{1}, ...
 					sin(0:.1:2*pi+.2)*0.125 + state{i}{2}, ...
 					'Color', state{i}{9});
-				eplot([state{i}{1} state{i}{1} + cos(state{i}{8}) * heading_length], ...
+				eplot('engine', ...
+                    [state{i}{1} state{i}{1} + cos(state{i}{8}) * heading_length], ...
 					[state{i}{2} state{i}{2} + sin(state{i}{8}) * heading_length], ...
 					'Color', state{i}{9});
 			end
             
             if display_health
                 f = bar_stack_offset * display_energy;
-                eplot([state{i}{1}-0.5*bar_length ...
+                eplot('engine', [state{i}{1}-0.5*bar_length ...
                     state{i}{1}+(state{i}{3}/health_max - 0.5)*bar_length], ...
                     [state{i}{2}+bar_offset+f state{i}{2}+bar_offset+f],...
                     'Color', [1 0 0]);
             end
             if display_energy
-                eplot([state{i}{1}-0.5*bar_length ...
+                eplot('engine', [state{i}{1}-0.5*bar_length ...
                     state{i}{1}+(state{i}{4}/energy_max - 0.5)*bar_length], ...
                     [state{i}{2}+bar_offset state{i}{2}+bar_offset],...
                     'Color', [0 0 1]);
@@ -281,7 +282,7 @@ while ~term
                 end
                 if hit
                     state{j}{3} = state{j}{3} - rifle_damage;
-                    eplot(state{j}{1} ,state{j}{2}, 'r*');
+                    eplot('engine', state{j}{1} ,state{j}{2}, 'r*');
                     delqueue = [delqueue i];
                 end
             end
@@ -290,14 +291,15 @@ while ~term
             if ~valid
                 delqueue = [delqueue i];
             else
-                eplot(objects{i}{2}, objects{i}{3}, '.', ...
+                eplot('engine', objects{i}{2}, objects{i}{3}, '.', ...
                     'Color', objects{i}{7})
             end
         end
 
         % Mines
         if strcmp(objects{i}{1}, 'mine')
-            eplot(objects{i}{2}, objects{i}{3}, '+', 'Color', objects{i}{7});
+            eplot('engine', ...
+                objects{i}{2}, objects{i}{3}, '+', 'Color', objects{i}{7});
             for j = 1:nplayers
                 hit = 0;
                 d = norm([ state{j}{1}-objects{i}{2}  state{j}{2}-objects{i}{3} ]);
@@ -316,7 +318,7 @@ while ~term
                 end
                 if hit
                     state{j}{3} = state{j}{3} - mine_damage;
-                    eplot(state{j}{1},state{j}{2},'r*')
+                    eplot('engine', state{j}{1},state{j}{2},'r*')
                     delqueue = [delqueue i];
                     explosion = { 'explosion' ; objects{i}{2} ; objects{i}{3} ; ...
                         mine_radius ; objects{i}{7} ; explosion_steps};
@@ -329,7 +331,7 @@ while ~term
         if strcmp(objects{i}{1}, 'destruct')
             if objects{i}{6}/ts < 5 && objects{i}{6} >= 0
                 r = (5 - objects{i}{6}/ts)/5 * destruct_radius;
-                eplot(...
+                eplot('engine', ...
                     sin(0:.1:3*pi)*r+objects{i}{2}, ...
                     cos(0:.1:3*pi)*r+objects{i}{3}, ...
                     'Color', objects{i}{7});
@@ -352,14 +354,14 @@ while ~term
                     end
                     if hit
                         state{j}{3} = state{j}{3} - eval(destruct_damage);
-                        eplot(state{j}{1},state{j}{2},'r*')
+                        eplot('engine', state{j}{1},state{j}{2},'r*')
                     end
                     delqueue = [delqueue i];
                 end
             end
             objects{i}{6} = objects{i}{6} - ts;
 
-            eplot(objects{i}{2}, objects{i}{3}, 'p', ...
+            eplot('engine', objects{i}{2}, objects{i}{3}, 'p', ...
                 'Color', objects{i}{7});
         end
 
@@ -374,7 +376,7 @@ while ~term
             if objects{i}{6} >= 0
                 r = (explosion_steps - objects{i}{6}) ...
                     / explosion_steps * objects{i}{4};
-                eplot(...
+                eplot('engine', ...
                     sin(0:.1:3*pi)*r+objects{i}{2}, ...
                     cos(0:.1:3*pi)*r+objects{i}{3}, ...
                     'Color', objects{i}{5});
@@ -389,7 +391,7 @@ while ~term
     objects(delqueue) = [];
 
     % Dont plotting durrent frame
-    eplot('setframe');
+    eplot('engine', 'setframe');
 
     check_teams = [];
     for i = 1:nplayers
@@ -418,7 +420,7 @@ for i = 1:length(dplist)
     end
 end
 
-eplot('finish');
+eplot('engine', 'finish');
 add_log([], [], t, [], 'finish');
 
 if ~exist('out', 'var')
