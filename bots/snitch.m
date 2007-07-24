@@ -14,7 +14,7 @@ num = player{6};
 name = player{7};
 heading = player{8};
 
-Rstep = 0.1;
+Rstep = .05;
 Hstep = 10*pi/180;
 
 Hlist = 0;
@@ -67,6 +67,27 @@ if isempty(bulletlist)
     end
     
 else
+%     %%%
+%     psi = (0:360)*pi/180;
+%     for i = 1:size(bulletlist,1)
+%         bx = bulletlist(i,1);
+%         by = bulletlist(i,2);
+%         bh = bulletlist(i,3);
+%         in = 1;
+%         while in
+%            plot(bx+rifle_radius*cos(psi),by+rifle_radius*sin(psi))
+%            bx = bx+rifle_speed*ts*cos(bh);
+%            by = by+rifle_speed*ts*sin(bh);
+%            if (bx<world(1))||(bx>world(2))||(by<world(3))||(by>world(4))
+%                in = 0;
+%            end
+%         end
+%         
+%     end
+%     %%%
+    
+    
+    
     R = 0;
     H = 0;
     hits = 0;
@@ -207,6 +228,8 @@ bpoly = [slope intercept];
 
 lower_circle_y = bpoly*[lower_circle_x 1]';
 upper_circle_y = bpoly*[upper_circle_x 1]';
+
+psi = (0:360)*pi/180;
 
 dist_lower = norm([xpos-lower_circle_x ypos-lower_circle_y]);
 dist_upper = norm([xpos-upper_circle_x ypos-upper_circle_y]);
