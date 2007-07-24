@@ -1,7 +1,7 @@
 function [deltaH throttle action] = sniper(state,player,objects,req)
 % SNIPER
 % coded by: Mike Abraham
-% last update: 07/17/2007
+% last update: 07/19/2007
 %
 % This was the first of my successful bots.  SNIPER targets the bot that
 % requires the least change in heading to aim at.  The throttle is equal to
@@ -18,7 +18,12 @@ engine_settings;
 
 datafile = ['sniper' num2str(player{5}) num2str(player{6}) '.mat'];
 
-if strcmp(req,'preclean')||strcmp(req,'clean')
+if strcmp(req,'selfplot')
+    throttle = 0;
+    deltaH = 0;
+    action = req;
+    return
+elseif strcmp(req,'preclean')||strcmp(req,'clean')
     if exist(datafile,'file')
         delete(datafile)
     end
@@ -105,7 +110,7 @@ deltaH = aim-heading;
 deltaH = mod(deltaH+pi,2*pi)-pi;
 
 %% Check to see if aiming is complete
-if abs(deltaH)>deltaH_max
+if (heading+deltaH)~=atan2(targety-ypos,targetx-xpos)
     oktoshoot = 0;
 end
 
@@ -124,5 +129,14 @@ end
 
 %% Throttle Management
 throttle = (dist-rifle_radius)^2;
+
+if abs(throttle)>1
+    throttle = throttle/abs(throttle);
+end
+
+if strcmp(player{7},'sniper')
+     drawenterprise(xpos+ts*throttle*cos(heading+deltaH),ypos+ts*throttle*sin(heading+deltaH),heading+deltaH,.75,player{9});
+   % drawghost(xpos+ts*throttle*cos(heading+deltaH),ypos+ts*throttle*sin(heading+deltaH),heading+deltaH,.25,player{9});
+end
 
 save (datafile,'firecount','target','targethist','oldtarget')
