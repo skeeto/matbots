@@ -1183,8 +1183,9 @@ interface. @code{eplot} automatically checks the engine settings to
 determine how the plot is handled, if at all. The plot will also be
 recorded in the game script recording (@pxref{Display Settings}).
 
-@code{eplot} is able to do any plot that @code{plot} is capable of as
-well as inserting text with the @code{text} command. When using
+@code{eplot} is able to do any plot that @code{plot} can
+do. @code{eplot} can also insert text with the @code{'text'} argument
+and do @code{fill} with the @code{'fill'} argument. When using
 @code{plot}, all arguments to @code{eplot} are passed to the
 @code{plot} command when a plot is made. For example,
 
@@ -1212,6 +1213,21 @@ eplot ('text', player@{1@}, player@{2@} + 0.3, 'BOOM! HEADSHOT!');
 @end example
 
 Will display ``BOOM! HEADSHOT!'' over the bot.
+
+@cindex fill
+@code{eplot} can also handle @code{fill}. To use it, the first
+argument is @code{'fill'} and all remaining arguments are arguments to
+@code{fill}.
+
+@example
+eplot ('fill', ...
+       [-1 -1  1  1 -1] * 0.125 + player@{1@}, ...
+       [ 1 -1 -1  1  1] * 0.125 + player@{2@}, ...
+       player@{9@});
+@end example
+
+Will display a non-rotating filled box of the bot's color at the bot's
+location.
 
 @c Existing Bots
 @node Existing Bots
