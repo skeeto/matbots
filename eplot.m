@@ -57,16 +57,20 @@ end
 
 % Check for text plot
 cmd = 'plot';
-plot_text = 0;
+not_plot = 0;
 if strcmp(varargin{1}, 'text')
     cmd = 'text';
     varargin(1) = [];
-    plot_text = 1;
+    not_plot = 1;
+elseif strcmp(varargin{1}, 'fill')
+    cmd = 'fill';
+    varargin(1) = [];
+    not_plot = 1;
 end
 
 % Avoid evaling a string
 done_plot = 0;
-if (display_game || record_game) && ~plot_text
+if (display_game || record_game) && ~not_plot
     if nargin == 3
         plot(varargin{1}, varargin{2}, varargin{3});
         done_plot = 1;
