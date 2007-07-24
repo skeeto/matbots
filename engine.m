@@ -28,8 +28,9 @@ else
     playerdata = get_playerdata('player_list.txt');
 end
 
-% Make bots visible to the engine
+% Make 'bots' and 'func' visible to the engine
 addpath('bots');
+addpath('func');
 
 engine_settings;
 
