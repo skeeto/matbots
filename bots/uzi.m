@@ -39,6 +39,9 @@ if energy<10
     action = ['HtoE' num2str(health-10)];
     deltaH = 0;
     throttle = 0;
+    if strcmp('uzi',player(7))
+    drawface(xpos+ts*throttle*cos(heading+deltaH),ypos+ts*throttle*sin(heading+deltaH),heading+deltaH,.16,player{9});
+end
     return
 end
 
@@ -55,6 +58,9 @@ if isempty(targetlist)
     action = 'none';
     throttle = 0;
     deltaH =0;
+    if strcmp('uzi',player(7))
+    drawface(xpos+ts*throttle*cos(heading+deltaH),ypos+ts*throttle*sin(heading+deltaH),heading+deltaH,.16,player{9});
+    end
     return
 end
 teamlist = sort([teamlist num]);
@@ -99,7 +105,7 @@ deltaH = aim-heading;
 deltaH = mod(deltaH+pi,2*pi)-pi;
 
 throttle = 0;
-if mod(heading+deltaH-atan2(targety-ypos,targetx-xpos),2*pi)==0
+if abs(deltaH)<=deltaH_max
     action = 'rifle';
 else
     action = 'none';
