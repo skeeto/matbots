@@ -213,10 +213,10 @@ while ~term
             if abs(throttle)>1
                 throttle = sign(throttle);
             end
-            if throttle*move_cost<=state{i}{4}
+            if abs(throttle) * move_cost <= state{i}{4}
                 state{i}{1} = state{i}{1}+throttle*cos(state{i}{8})*ts;
                 state{i}{2} = state{i}{2}+throttle*sin(state{i}{8})*ts;
-                state{i}{4} = state{i}{4}-move_cost*throttle;
+                state{i}{4} = state{i}{4}-move_cost*abs(throttle);
             end
 
             %Check boundary
