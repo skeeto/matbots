@@ -153,7 +153,8 @@ greater processing time to simulate the game.
 @cindex friendly fire
 @code{friendly_fire} enables friendly fire for the game. With friendly
 fire turned on, bullets and mines will hurt fellow teammates in the
-game.
+game. Grenades will hurt everyone, including the bot that shot the
+grenade.
 
 @cindex player mask
 @cindex hiding player information
@@ -171,7 +172,7 @@ teams are placed evenly around the outside of the world.
 
 @code{group_teams_radius} determines the radius of the circle in which
 an entire team starts when @code{group_teams} is enabled. If this is
-set to 0, all teams members will be exactly on top of each other.
+set to 0, all team members will be exactly on top of each other.
 
 @c Display Settings
 @node Display Settings
@@ -180,12 +181,11 @@ set to 0, all teams members will be exactly on top of each other.
 
 This section contains settings that effect the display of the world
 during the game as well as the recordings from that game. Changing
-these have no effect on the game, except maybe to cause it to take
-longer to play out.
+these have no effect on the game, except perhaps to make take longer
+to play out.
 
 @code{heading_length} is the length of the line that shows a bot's
-heading. By default, this is set to scale by the world size so that
-the heading length will appear the same across different world sizes.
+heading. This only applies when a bot does not draw itself.
 
 @code{display_game} determines whether or not the game is displayed
 during the run. When disabled, the game will still run the same way
@@ -204,12 +204,13 @@ to convert a game video into a movie file for play outside of Matlab.
 @cindex script game
 With @code{script_game}, the game display is dumped to an m-file by
 the name stored in @code{script_file}. This works by putting all
-@code{plot} and @code{text} commands to an m-file along with all the
-data needed (@pxref{Bot Plotting}). This m-file can be played back
-from any instance of Matlab anywhere without the engine or any bots
-present. This means you can share the recording with anyone who has
-Matlab. Because it records plot commands, the ``video'' has infinite
-resolution and can be played back at any size without loss of quality.
+@code{plot}, @code{text}, and @code{fill} commands to an m-file along
+with all the data needed (@pxref{Bot Plotting}). This m-file can be
+played back from any instance of Matlab anywhere without the engine or
+any bots present. This means you can share the recording with anyone
+who has Matlab. Because it records plot commands, the ``video'' has
+infinite resolution and can be played back at any size without loss of
+quality.
 
 The scripted game also has built-in recording facilities, allowing it
 to be easily converted into a video file. To turn this on, edit the
@@ -218,16 +219,17 @@ first line of the script to set @code{record_game} to 1 instead of
 
 In-game data can also be logged and this log data is placed into a
 structure called @code{bots} and stored in the file named by
-@code{log_file}. Logging is enabled with @code{log_game}.
+@code{log_file}. Information on bot CPU time is stored in
+@code{bot_time}. Logging is enabled with @code{log_game}.
 
 @code{silent_bots} will quietly disable bot @code{eplot} commands. All
-bots will be drawn as normal little circles with heading lines. This
+bots will be drawn normally as little circles with heading lines. This
 is reflected in game recordings as well. Use this if you want to
 battle loud and colorful bots with a cleaner looking game.
 
-The game also supports putting health and energy bars above
-players. These are controlled by the remaining
-settings. @code{display_health} and @code{display_energy} controls
+The game also supports drawing health and energy bars above
+players. These are controlled by the remaining settings in this
+section. @code{display_health} and @code{display_energy} controls
 whether these bars are visible or not. The other three settings,
 @code{bar_length}, @code{bar_offset}, and @code{bar_stack_offset}
 controls the look of the bars: length, distance from each other,
@@ -261,7 +263,7 @@ entire @code{move_cost} amount.
 @code{deltaH_max} is the maximum amount of angular distance a bot can
 turn at once. Setting this to a low value will greatly reduce the
 movement capabilities of the bots. Setting this value high will make
-the games look boring (really!).
+watching games a boring activity (really!).
 
 @c ---------------------------------------------------------------------
 @c Programming Basics
@@ -282,7 +284,7 @@ the games look boring (really!).
 
 @cindex state vector
 A bot's current state is completely described by its state vector.
-The state vector is stored as a 1 by 9 cell array. The values are
+The state vector is stored as a 1 by 10 cell array. The values are
 stored in this order,
 
 @enumerate
@@ -321,18 +323,20 @@ Bot function handle (function handle)
 @cindex player position
 The @var{x-position} and @var{y-position} are straightforward: each is
 a floating point value between the defined world boundaries, stored in
-@code{world}. These are Cartesian coordinated with the origin is on
-the bottom left and increasing values going right and up.
+@code{world}. These are Cartesian coordinates with the origin at the
+bottom left and increasing values going right and up.
 
 @cindex health
 The @var{health} is a value between 0 and @code{health_max}. When a
-bot's health is 0, this bot is dead and is removed from the game.
+bot's health is 0, this bot is dead and is removed from the
+game. Health slowly regenerates at the rate @code{health_regen}.
 
 @cindex energy
 The bot's @var{energy} is the fuel used to execute most, if not all,
-actions: movement, shooting, dropping mines, self-destruct. Energy
-slowly regenerates at the rate stored in @code{energy_regen}. If a
-bot's energy is zero, the bot probably cannot do anything but wait for
+actions (depending on the engine settings): movement, shooting,
+dropping mines, tossing grenades, self-destruct. Energy slowly
+regenerates at the rate stored in @code{energy_regen}. If a bot's
+energy is zero, the bot probably cannot do anything but wait for
 energy to regenerate.
 
 The @var{team} is a string that identifies which team a bot is playing
@@ -343,9 +347,9 @@ their team names match. Teams share a common color.
 The @var{player number} is a @emph{unique} number assigned to each bot
 before the game begins. This number will never change during the
 course of a game. This means that if a bot dies, the player numbers
-are not adjusted. For example, there are four players at the beginning
-of a game, which are assigned numbers 1 through 4. When player number
-3 dies, the remaining players will be 1, 2, and 4. Player 4 is
+are not adjusted. For example, if there are four players at the
+beginning of a game each is assigned numbers 1 through 4. When player
+number 3 dies, the remaining players will be 1, 2, and 4. Player 4 is
 @emph{not} changed into player 3. Confusion on this point is a cause
 of many programming errors.
 
@@ -362,7 +366,8 @@ to the right, east, or the positive x direction.
 
 @cindex color
 The @var{color} is simply the color that the engine is using to plot
-the bot. This is of very little use to bot programming.
+the bot. This is useful for a bot that is drawing itself (@pxref{Bot
+Plotting}).
 
 @cindex function handle
 The @var{bot function handle} is the function handle that the engine
@@ -443,9 +448,10 @@ is pi/3 and the desired heading is pi/6, the deltaH would need to be
 @cindex throttle
 @code{throttle} is a commanded speed. A positive throttle value
 represents motion in the direction of the heading. @code{throttle}
-should be a value between -1 and 1. A throttle value of 1 will move
-the bot at a speed of 1 world unit per second. The energy per timestep
-required for a throttle setting of 1 is @code{move_cost}.
+should be a value between -1 and 1, where negative throttle commands
+the bot backwards. A throttle value of 1 will move the bot at a speed
+of 1 world unit per second. The energy per timestep required for a
+throttle setting of 1 is @code{move_cost}.
 
 @cindex action
 @code{action} is a string containing the bot @var{action} for this
@@ -464,8 +470,8 @@ turn. @xref{Actions}.
 * Self Destruct::     Self destruction to harm others
 @end menu
 
-To perform no action at all, simply return @code{'none'} for
-@var{action}.
+To perform no action at all, simply return @code{'none'}, or empty
+(@code{''}), for @var{action}.
 
 @c Rifle
 @node Rifle
@@ -524,6 +530,13 @@ the explosion. The explosion itself does no damage. Note that when
 team damage is enabled with @code{team_damage}, the rifle shots from
 the grenade explosion can hurt the player that tossed the grenade.
 
+This code will log a grenade 1.6 units in front of the bot,
+
+@example
+% Toss a grenade 1.6 meters
+action = ['grenade' num2str(1.6)];
+@end example
+
 A grenade costs @code{grenade_cost} and travels at a speed of
 @code{grenade_speed}.
 
@@ -574,11 +587,11 @@ of the game and the self destruct damage never happens.
 @section Requests
 @cindex requests
 
-Currently there are only two requests that the engine makes. There
-will be more in the future, which means that a bot should always
-return values and be prepared for unknown requests. Basically this
-means that ignoring unknown requests by returning empty or zero values
-when they come up.
+Currently there are three requests that the engine makes. There may be
+more in the future, which means that a bot should always return values
+and be prepared for unknown requests. Basically this means a bot
+should ignore unknown requests by returning empty or zero values when
+they come up.
 
 @menu
 * Clean and Preclean::    Bot pre-game and post-game cleanup
@@ -593,7 +606,7 @@ when they come up.
 Before every game, the engine will send a @code{'preclean'} requests
 to every bot. The state vector (the first argument) will be empty,
 which may cause simple bots to declare victory. The player vector is
-provided as this may be important chosen filenames.
+provided as this may be important in choosing filenames.
 
 Use this to prepare any data files that are needed for the game. More
 importantly, it allows the bot to clean up files that may be left over
@@ -866,7 +879,7 @@ Color
 
 The destruct object is located at (@var{'x-position'},
 @var{'y-position'}). It belongs to team @var{team} and player
-@var{player} (now dead). It will explode when @var{timer} reaches
+@var{player} (now dead). It will explode when the @var{timer} reaches
 zero.
 
 @c ---------------------------------------------------------------------
@@ -877,7 +890,7 @@ zero.
 This chapter will go through a step-by-step process of creating a
 simple seek and destroy bot that has memory. Even if you think you are
 ready to get started, you should take a look at this chapter to see
-how to avoid making come mistakes. It is also a guide on creating well
+how to avoid making some mistakes. It is also a guide on creating well
 behaved bots.
 
 @menu
@@ -943,9 +956,9 @@ end
 @end example
 
 Putting this near the top of the bot program will allow the bot to
-handle incoming requests before doing anything possibly
-unnecessary. The above example handles @code{'clean'} and
-@code{'preclean'} while ignoring unknown requests.
+handle incoming requests before doing anything unnecessary. The above
+example handles @code{'clean'} and @code{'preclean'} while ignoring
+unknown requests.
 
 @xref{Requests}.
 
@@ -981,10 +994,10 @@ the engine will execute the bot actions,
 @cindex order of execution
 @enumerate
 @item
-Changes heading by @code{deltaH}
+Changes heading by @code{deltaH}.
 
 @item
-Executes the action (@code{rifle}, @code{mine}, etc.)
+Executes the action (@code{rifle}, @code{mine}, etc.).
 
 @item
 Moves the bot a distance of @code{throttle * ts} along the new heading.
@@ -1122,8 +1135,8 @@ A full listing of this bot's code is in @ref{Simple Example}.
 @cindex targeting
 
 Continuing the use of the above code, we will add targeting to the
-code. There is no official targeting interface. A bot just picks a bot
-and sticks with it.
+code. There is no official targeting interface. A bot just picks an
+enemy bot and sticks with it.
 
 This example will pick an enemy bot at random, remember that bot as a
 target, and pursue the bot until it is dead. The full code for this
@@ -1201,8 +1214,8 @@ target_index = enemy_index(sel_index);
 Now we have a target and know it's index into the state vector. Let's
 turn our bot to face this enemy at his current position. In this
 example, we will not attempt to predict enemy movement and shoot
-there. This is left up to you to solve. There are many different ways
-to solve this problem, some better than others.
+there. This is left up to you, the bot programmer, to solve. There are
+many different ways to solve this problem, some better than others.
 
 Calculate the heading required to face the other bot,
 
@@ -1211,7 +1224,7 @@ target_heading = atan2(state@{target_index@}@{2@} - player@{2@}, ...
                        state@{target_index@}@{1@} - player@{1@});
 @end example
 
-Now we set deltaH to this different, causing the bot to turn in the
+Now we set deltaH to this difference, causing the bot to turn in the
 correct direction,
 
 @example
@@ -1341,8 +1354,8 @@ location.
 @section Existing Bots
 
 Several bots are already be written, some of which should be useful in
-debugging and testing the bots that you are writing. Other good for
-studying techniques to be used in your bots.
+debugging and testing the bots that you are writing. Others are good
+for studying techniques to be used in your bots.
 
 @menu
 * Target Dummies::    Bots good for shooting
@@ -1355,7 +1368,7 @@ studying techniques to be used in your bots.
 @subsection Target Dummies
 @cindex target dummies
 
-This collection of bots are great for testing your bots, especially
+This collection of bots is great for testing your bots, especially
 targeting algorithms. Until you have polished your bot, these will be
 often be the enemy.
 
@@ -1403,7 +1416,8 @@ target while closing in. A seek and destroy group.
 
 The @dfn{uzi} bot is the most deadly bot ever created. These guys will
 work as a team to quickly eliminate several other bots in the first
-few seconds of the game.
+few seconds of the game (as long as they are not evasion bots,
+@ref{Evasion Bots}).
 
 @c Evasion Bots
 @node Evasion Bots
@@ -1417,7 +1431,8 @@ bots in the game right now.
 The @dfn{evader} bot, being first of its kind, is extremely passive
 and holds no grudges. It will quietly dodge anything thrown at it. It
 does need privacy, however. If someone gets too close, all hell will
-break loose as it unloads all of its energy on the rude bot.
+break loose as it unloads all of its energy on the rude, offensive
+bot.
 
 The @dfn{snitch} is currently the number one bot, but it requires
 immense CPU time compared to other bots. It will dodge just about
