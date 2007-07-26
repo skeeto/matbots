@@ -51,6 +51,12 @@ elseif how_many_we == how_many_total && isempty(req)
         throttle = 0;
         deltaH = deltaH_max;
         action = '';
+        if how_many_we == 1 || state{who_we(1)}{6} > num
+            [y,Fs,bits] = wavread('my_sounds.wav');
+            hell_be_engr = y(220000:240000);
+            worse_than_feared = y(1:19000);
+            sound([worse_than_feared;hell_be_engr],Fs)
+        end
 elseif strcmp(req,'clean')
         if exist(['goteam',team,'.mat'],'file')
             load(['goteam',team,'.mat'])
@@ -64,6 +70,7 @@ else
 %% AM I FIRST???  ALONE???
 
     if how_many_we == 1 || state{who_we(1)}{6} > num
+        leader = num;
         %time to think
         
 %% NOT FIRST STEP, SO SETUP STUFF
@@ -83,6 +90,13 @@ else
             out_shots_in_air = sortrows(our_shots_in_air);
         end
     end
+    
+    if game_step < 20
+        eplot('text',xpos,ypos+.5,'READY ???')
+    elseif game_step > 25 && game_step < 30
+        eplot('text',xpos,ypos+.5,'LET''S DO THIS !!!!!')
+    end
+    
     clear targeting_nums
     
 %% WHERE ARE WE??
@@ -298,7 +312,7 @@ else
 
 %% WRITE TO MAT FILE
            % if I want to write something this would be a good time
-           save(filename,'targeting_nums','where_they_at','our_shots_in_air')
+           save(filename,'targeting_nums','where_they_at','our_shots_in_air','leader')
 
 %% I AM NOT ALONE AND AM NOT FIRST
     else 
@@ -481,6 +495,12 @@ filename = ['power',superduper,'.mat'];
 load(filename)
 
 [n,how_many_obj] = size(objects);
+
+if num ~= leader && game_step > 5 && game_step < 20
+    eplot('text',xpos,ypos+.5,say_it)
+elseif game_step > 28 && game_step < 33
+    eplot('text',xpos,ypos+.5,'KILL ''EM!!!!!!')
+end
 
 %% FIND THREATS
 
@@ -692,7 +712,7 @@ else % no bullets in the air that aren't mine
 
     if ~isempty(who_close)
         [deltaH throttle action] = make_my_day(who_close,enemies,heading);
-        plot_me(my_color,'',xpos,ypos,heading)
+        plot_me(my_color,'r',xpos,ypos,heading)
     elseif health <= 3*rifle_damage
         throttle = 0;
         action = ['HtoE-',num2str(energy/2)];
