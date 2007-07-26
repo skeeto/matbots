@@ -480,7 +480,9 @@ end
 
 eplot('engine', 'finish');
 add_log([], [], t, [], 'finish');
-save(log_file, 'bot_time', '-append');
+if log_game
+    save(log_file, 'bot_time', '-append');
+end
 
 if ~exist('out', 'var')
     out = '';
