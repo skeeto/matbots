@@ -459,6 +459,7 @@ turn. @xref{Actions}.
 @menu
 * Rifle::             Shooting a bullet
 * Mine::              Dropping a mine
+* Grenade::           Tossing a grenade
 * Health to Energy::  Converting health to energy and vice-versa
 * Self Destruct::     Self destruction to harm others
 @end menu
@@ -505,6 +506,26 @@ A mine sits passively on the ground until another bot who can be
 damaged by the mine comes too close. If no bot ever approaches the
 mine, the mine will sit there forever (or until the game ends). If two
 bots wander in range at the same time, they will both be hurt.
+
+@c Grenade
+@node Grenade
+@subsection Grenade
+@cindex grenade
+
+@code{'grenadeD'} will toss a grenade in the direction of the heading
+to a distance of @code{D}, where @code{D} is a floating point value. A
+negative value for distance will result in a grenade tossed
+backwards. The maximum distance a grenade can be tossed is determined
+by @code{grenade_throw_max}.
+
+A grenade explodes upon reaching its toss distance. This explosion
+releases @code{grenade_bits} rifle shots evenly in all directions from
+the explosion. The explosion itself does no damage. Note that when
+team damage is enabled with @code{team_damage}, the rifle shots from
+the grenade explosion can hurt the player that tossed the grenade.
+
+A grenade costs @code{grenade_cost} and travels at a speed of
+@code{grenade_speed}.
 
 @c Health to Energy
 @node Health to Energy
@@ -685,6 +706,8 @@ of the object.
 @menu
 * Rifle Object::     Bullets in the battlefield
 * Mine Object::      Mines dropped by players
+* Grenade Object::   A grenade that will soon explode
+* Destruct Object::  A bot's self destruct remains
 @end menu
 
 @c Rifle Object
@@ -766,6 +789,85 @@ empty for now.
 
 The @var{color} value may be useful with @code{eplot} (@pxref{Bot
 Plotting}).
+
+@c Grenade Object
+@node Grenade Object
+@subsection Grenade Object
+@cindex grenade
+
+The grenade object is thrown by a player (@pxref{Grenade}). It travels
+a certain distance and then explodes into @code{grenade_bits} rifle
+shots.
+
+@enumerate
+@item
+Object name (@code{'grenade'})
+
+@item
+X position
+
+@item
+Y position
+
+@item
+Heading
+
+@item
+Team
+
+@item
+Player
+
+@item
+Color
+
+@item
+Distance to target
+
+@end enumerate
+
+The grenade is located at (@var{x-position}, @var{y-position}) and
+traveling in the direction @var{heading} at @code{grenade_speed}. When
+@var{distance to target} is 0, the grenade explodes. The resulting
+rifle shots will belong to team @var{team} and player @var{player}.
+
+@c Destruct Object
+@node Destruct Object
+@subsection Destruct Object
+@cindex destruct
+@cindex self destruct
+
+The self destruct object is left behind when a player self destructs
+with action @code{'destruct'} (@pxref{Self Destruct}).
+
+@enumerate
+@item
+Object name (@code{'destruct'})
+
+@item
+X position
+
+@item
+Y position
+
+@item
+Team
+
+@item
+Player
+
+@item
+Timer
+
+@item
+Color
+
+@end enumerate
+
+The destruct object is located at (@var{'x-position'},
+@var{'y-position'}). It belongs to team @var{team} and player
+@var{player} (now dead). It will explode when @var{timer} reaches
+zero.
 
 @c ---------------------------------------------------------------------
 @c Creating a Bot
