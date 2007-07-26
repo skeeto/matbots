@@ -47,9 +47,9 @@ rifle_damage = 10;
 
 % Mine information
 mine_enable = 1;
-mine_cost = 10;
+mine_cost = 3;
 mine_radius = 0.5;
-mine_damage = 10;
+mine_damage = 20;
 
 % HtoE information
 HtoE_enable = 1;
@@ -59,5 +59,5 @@ health_energy_ratio = 1;
 destruct_enable = 1;
 destruct_radius = 3;
 destruct_time = 1;
-destruct_damage = '2^(-d) * 25';
+destruct_damage = '2^(-d) * 75';
 destruct_cost = 5;
