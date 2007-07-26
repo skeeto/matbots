@@ -85,6 +85,8 @@ for i = 1:nplayers
     player{9} = colorlist{mod(team - 1, length(colorlist)) + 1};
     player{10} = eval(['@' player{7}]);
     state = [state {player}];
+    
+    bot_time.(player{7}) = 0;
 end
 
 % Have each bot prepare its files.
@@ -148,7 +150,11 @@ while ~term
 
             end
 
+            % Call the bot
+            tic;
             [deltaH throttle action] = state{i}{10}(ostate,pstate,objects,[]);
+            bot_time.(state{i}{7}) = bot_time.(state{i}{7}) + toc;
+            
             deltaH = mod(deltaH + pi, 2*pi) - pi;
             if abs(deltaH)>deltaH_max
                 deltaH = deltaH_max*sign(deltaH);
@@ -206,6 +212,25 @@ while ~term
                     objects = [objects {destruct}];
                     state{i}{4} = state{i}{4} - destruct_cost;
                     state{i}{3} = 0;
+                end
+                % grenade
+            elseif ~isempty(regexp(action, '^grenade')) && grenade_enable
+                if grenade_cost <= state{i}{4}
+                    d = str2double(action(8:end));
+                    if abs(d) > grenade_throw_max
+                        d = grenade_throw_max * sign(d);
+                    end
+                    hd = state{i}{8};
+                    if d < 0
+                        % Throw backwards
+                        hd = mod(hd + pi + pi, 2*pi) - pi;
+                        d = -d;
+                    end
+                    grenade = { 'grenade' ; state{i}{1} ; state{i}{2} ; ...
+                        hd ; state{i}{5} ; state{i}{6} ; ...
+                        state{i}{9}; d };
+                    objects = [objects {grenade}];
+                    state{i}{4} = state{i}{4} - grenade_cost;
                 end
             end
 
@@ -328,6 +353,36 @@ while ~term
             end
         end
 
+        % Grenades
+        if strcmp(objects{i}{1}, 'grenade')
+            eplot('engine', ...
+                objects{i}{2}, objects{i}{3}, 's', 'Color', objects{i}{7});
+            if objects{i}{8} <= 0
+                astep = 2*pi / grenade_bits;
+                for j = 1:grenade_bits
+                    rifle = { 'rifle' ; objects{i}{2} ; objects{i}{3} ; ...
+                        astep * j ; objects{i}{5} ; objects{i}{6} ; ...
+                        objects{i}{7} };
+                    objects = [objects {rifle}];
+                end
+                explosion = { 'explosion' ; objects{i}{2} ; objects{i}{3} ; ...
+                    rifle_radius ; objects{i}{7} ; explosion_steps};
+                objects = [objects {explosion}];
+                delqueue = [delqueue i];
+            else
+                d = min (grenade_speed * ts, objects{i}{8});
+                objects{i}{2} = objects{i}{2} + cos(objects{i}{4}) * d;
+                objects{i}{3} = objects{i}{3} + sin(objects{i}{4}) * d;
+                objects{i}{8} = objects{i}{8} - d;
+                % Check boundary
+                [valid objects{i}{2} objects{i}{3}] = ...
+                    checkbounds(objects{i}{2},objects{i}{3},world);
+                if ~valid
+                    objects{i}{8} = 0;
+                end
+            end
+        end        
+        
         % Self destruct
         if strcmp(objects{i}{1}, 'destruct')
             if objects{i}{6}/ts < 5 && objects{i}{6} >= 0
@@ -423,6 +478,7 @@ end
 
 eplot('engine', 'finish');
 add_log([], [], t, [], 'finish');
+save(log_file, 'bot_time', '-append');
 
 if ~exist('out', 'var')
     out = '';
