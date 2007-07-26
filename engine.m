@@ -227,7 +227,7 @@ while ~term
                         d = -d;
                     end
                     grenade = { 'grenade' ; state{i}{1} ; state{i}{2} ; ...
-                        hd ; state{i}{5} ; state{i}{6} ; ...
+                        hd ; state{i}{5} ; -1 ; ...
                         state{i}{9}; d };
                     objects = [objects {grenade}];
                     state{i}{4} = state{i}{4} - grenade_cost;
@@ -302,7 +302,9 @@ while ~term
                     else
                         if ~strcmp(objects{i}{5}, state{j}{5})
                             hit = 1;
-                            add_log(objects{i}{6}, 'rifle_hit', t, 1, '+')
+                            if objects{i}{6} > 0
+                                add_log(objects{i}{6}, 'rifle_hit', t, 1, '+')
+                            end
                         end
                     end
                 end

@@ -64,7 +64,7 @@ destruct_cost = 5;
 
 % Grenade information
 grenade_enable = 1;
-grenade_throw_max = 3;
+grenade_throw_max = 2.5;
 grenade_bits = 12;
 grenade_speed = 5;
 grenade_cost = rifle_cost * grenade_bits / 6;
