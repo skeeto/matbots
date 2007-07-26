@@ -102,6 +102,7 @@ if (~done_plot && (display_game || record_game)) || script_game
         if isnumeric(i)
             plot_cmd = [plot_cmd '[' num2str(i) '], '];
         else
+            i = strrep(i, '''', '''''');
             plot_cmd = [plot_cmd '''' i ''', '];
         end
     end
