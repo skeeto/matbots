@@ -9,7 +9,7 @@ group_teams_radius = norm([world(1)-world(2) world(3)-world(4)]) / 10;
 
 %--------------------------------------------------------------------------
 % Display settings
-heading_length = norm([world(1) - world(2) world(3) - world(4)])/35;
+heading_length = 0.4;
 display_game = 1;
 record_game = 0;
 script_game = 1;
