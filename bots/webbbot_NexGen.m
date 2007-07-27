@@ -51,6 +51,7 @@ elseif how_many_we == how_many_total && isempty(req)
         throttle = 0;
         deltaH = deltaH_max;
         action = '';
+        plot_me(my_color,'',xpos,ypos,heading,'big')
         if how_many_we == 1 || state{who_we(1)}{6} > num
             [y,Fs,bits] = wavread('my_sounds.wav');
             hell_be_engr = y(220000:240000);
@@ -90,13 +91,34 @@ else
             out_shots_in_air = sortrows(our_shots_in_air);
         end
     end
-    
-    if game_step < 20
-        eplot('text',xpos,ypos+.5,'READY ???')
-    elseif game_step > 25 && game_step < 30
-        eplot('text',xpos,ypos+.5,'LET''S DO THIS !!!!!')
+
+    if how_many_we ~= 1
+        if game_step < 10
+            eplot('text',xpos,ypos+.5,['READY ???'])
+        elseif game_step > 15 && game_step <= 20
+            eplot('text',xpos,ypos+.5,'LET''S DO THIS !!!!!')
+        end
+
+        if game_step == 1;
+            things2say = [{'OH YEAH!!!'};...
+                          {'I''M IN!!!'};...
+                          {'REPORTING FOR DUTY!'};...
+                          {'WHAT?!?'};...
+                          {'SIR, YES, SIR!!'};...
+                          {'O''DOYALE RULES!!!'};...
+                          {'LET ME AT ''EM!'};...
+                          {'MEEP MEEP'};...
+                          {'GO TEAM!!!'}];
+
+          for i = 1:how_many_we-1
+              team_says{i,1} = state{who_we(i)}{6};
+              team_says{i,2} = things2say{ceil(rand*length(things2say))};
+              team_says{i,3} = ceil(rand*5);
+          end
+        end
+    else
+        team_says = [];
     end
-    
     clear targeting_nums
     
 %% WHERE ARE WE??
@@ -312,7 +334,7 @@ else
 
 %% WRITE TO MAT FILE
            % if I want to write something this would be a good time
-           save(filename,'targeting_nums','where_they_at','our_shots_in_air','leader')
+           save(filename,'targeting_nums','where_they_at','our_shots_in_air','leader','team_says')
 
 %% I AM NOT ALONE AND AM NOT FIRST
     else 
@@ -458,7 +480,7 @@ else
             [total_my_shots,two] = size(our_shots_in_air);
             our_shots_in_air(total_my_shots+1,1) = my_target_num;
             our_shots_in_air(total_my_shots+1,2) = t_hit;
-            save(filename,'targeting_nums','where_they_at','our_shots_in_air')
+            save(filename,'targeting_nums','where_they_at','our_shots_in_air','leader','team_says')
 %             if  targeting_nums(find(targeting_nums(:,1)==num),4)== 1;
 %                 words = 'GOODBYE';
 %             end
@@ -496,10 +518,20 @@ load(filename)
 
 [n,how_many_obj] = size(objects);
 
-if num ~= leader && game_step > 5 && game_step < 20
-    eplot('text',xpos,ypos+.5,say_it)
-elseif game_step > 28 && game_step < 33
-    eplot('text',xpos,ypos+.5,'KILL ''EM!!!!!!')
+if num ~= leader && game_step < 20
+    sz = size(team_says);
+    for i = 1:sz(1,1)
+        if team_says{i,1} == num
+            my_says_num = i;
+        end
+    end
+    time_num = team_says{my_says_num,3};
+    
+    if game_step > time_num+3 && game_step < time_num+8     
+        eplot('text',xpos,ypos+.5,team_says{my_says_num,2})
+    end
+elseif num ~= leader && game_step > 18 && game_step < 25
+    eplot('text',xpos,ypos+.5,['KILL ''EM!!!!!!'])
 end
 
 %% FIND THREATS
@@ -689,6 +721,10 @@ if exist('bullets','var')
            end
        end
        plot_me(my_color,'',xpos,ypos,heading)
+       if ~exist('deltaH','var')
+           deltaH = 0;
+           disp('no DeltaH - not safe')
+       end
    end
 %    pause
 %     deltaH
@@ -712,8 +748,9 @@ else % no bullets in the air that aren't mine
 
     if ~isempty(who_close)
         [deltaH throttle action] = make_my_day(who_close,enemies,heading);
-        plot_me(my_color,'r',xpos,ypos,heading)
+        plot_me(my_color,'rrrrr',xpos,ypos,heading)
     elseif health <= 3*rifle_damage
+        deltaH = 0;
         throttle = 0;
         action = ['HtoE-',num2str(energy/2)];
         plot_me('w','',xpos,ypos,heading)
@@ -819,12 +856,25 @@ else
 end
 
 %% PLOT
-function plot_me(my_color,words,xpos,ypos,heading)
+function plot_me(my_color,words,xpos,ypos,heading,size)
+engine_settings
 
-
+if ~exist('size','var')
+    scalex = 1;
+    scaley = 1;
+    line = .5;
+elseif strcmp(size,'big')
+    scalex = (world(2)-world(1))/(2*.75*.25);
+    scaley = (world(4)-world(3))/(2*.75*.25);
+    xpos = (world(1)+world(2))/2;
+    ypos = (world(3)+world(4))/2;
+    heading = pi/2;
+    line = 15;
+    
+end
 % my aw thing
-    xpic = 0.75*[-.25 -.125  0 .0625 -.0625 .0625 .125 .25];
-    ypic = 0.75*[ .20 -.25 .25 0     0      0   -.25  .20];
+    xpic = scalex*0.75*[-.25 -.125  0 .0625 -.0625 .0625 .125 .25];
+    ypic = scaley*0.75*[ .20 -.25 .25 0     0      0   -.25  .20];
     
     rotate = [ cos(heading-pi/2) -sin(heading-pi/2) ; ...
                sin(heading-pi/2)  cos(heading-pi/2) ];
@@ -833,7 +883,7 @@ function plot_me(my_color,words,xpos,ypos,heading)
     look(1,:) = look(1,:) + xpos;
     look(2,:) = look(2,:) + ypos;
  
-    eplot(look(1,:),look(2,:),'color',my_color)
+    eplot(look(1,:),look(2,:),'color',my_color,'linewidth',line)
     eplot('text',xpos+.25,ypos+.25,words)
 
 
