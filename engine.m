@@ -226,6 +226,8 @@ while ~term
                         hd = mod(hd + pi + pi, 2*pi) - pi;
                         d = -d;
                     end
+                    d = d + grenade_dfuzz * (rand * 2 - 1);
+                    hd = hd + grenade_rfuzz * (rand * 2 - 1);
                     grenade = { 'grenade' ; state{i}{1} ; state{i}{2} ; ...
                         hd ; state{i}{5} ; -1 ; ...
                         state{i}{9}; d };
