@@ -83,7 +83,7 @@ else
         eplot('text',xpos,ypos+.5,'hit me!!!')
     end  
 %% DO STUFF    
-    if count == 2 % there is only one bad guy
+    if count >= 2 % there is only one bad guy
         my_speed = 1;
         if enemies(1,4)*my_speed/rifle_speed > 2*rifle_radius
             run = 0;
@@ -94,7 +94,7 @@ else
             N = floor((enemies(1,4)/(rifle_speed) - 1*rifle_radius/my_speed)/ts)+ 5;
             if mod(game_step,N) >= N/2
                 sign = 1;  
-                if energy+health >= 180
+                if energy+health >= 175
                     offset = 2*pi/6;
                 else
                     offset = pi/2;
