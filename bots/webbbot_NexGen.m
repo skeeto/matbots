@@ -14,6 +14,7 @@ heading = player{8};
 my_color = player{9};
 
 
+
 sz_obj = size(objects);
 how_many_obj = sz_obj(1,2);
 
@@ -389,6 +390,9 @@ else
 
     if game_step == 1
         targeting = 'stationary';
+        x_t_n = where_they_at(where_num,2,game_step);
+        y_t_n = where_they_at(where_num,3,game_step);
+        
     else%if game_step == 2
         where_they_at(where_num,:,game_step-1:game_step);
 
@@ -467,6 +471,15 @@ else
     int_check3 = int_check-int_check2;
     words = '';
     if int_check3 < 4
+            % CrossHairs
+            x = -1:.01:1;
+            y1 = sqrt(1-x.^2);
+            y2 = -y1;
+            x3 = [0,0,0];
+            y3 = [0,1,-1];
+            X = .5*[x,x,x3]+x_t_n;
+            Y = .5*[y1,y2,y3]+y_t_n;
+            eplot(X,Y,'color',my_color)
         if isempty(dif_head)
            angle_target
            ydif_target
@@ -474,22 +487,17 @@ else
         end
         if abs(dif_head) < .1 && energy > 2*move_cost
             action = 'rifle';
-%          disp('killing bots')
             throttle = 0;
             % save bullet information
             [total_my_shots,two] = size(our_shots_in_air);
             our_shots_in_air(total_my_shots+1,1) = my_target_num;
             our_shots_in_air(total_my_shots+1,2) = t_hit;
             save(filename,'targeting_nums','where_they_at','our_shots_in_air','leader','team_says')
-%             if  targeting_nums(find(targeting_nums(:,1)==num),4)== 1;
-%                 words = 'GOODBYE';
-%             end
             my_color = 'r';
         else 
             action = '';
             throttle = 0;
         end
-            
     else
     %         [deltaH throttle action] = dodgeball(how_many_total,state,objects,player);
             action = '';
