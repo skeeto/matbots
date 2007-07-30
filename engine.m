@@ -30,6 +30,7 @@ end
 
 % Make 'bots' and 'func' visible to the engine
 addpath('bots');
+addpath('human');
 addpath('func');
 
 engine_settings;
