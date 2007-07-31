@@ -26,8 +26,9 @@ if length(varargin) == 1
         if script_game
             script_fid = fopen(script_file, 'wt');
             fprintf(script_fid, '%% Settings:\n');
-            fprintf(script_fid, 'record_game = 0;\n');
-            fprintf(script_fid, 'watch = [];\n\n');
+            fprintf(script_fid, 'record_game = 0    ; %% Save as video format\n');
+            fprintf(script_fid, 'ts          = 0.05 ; %% Playback speed\n');
+            fprintf(script_fid, 'watch       = []   ; %% Recording data\n\n');
         end
     elseif strcmp(varargin{1}, 'finish')
         if script_game
@@ -58,6 +59,7 @@ if length(varargin) == 1
             fprintf(script_fid, 'axis(''equal'');\n');
             fprintf(script_fid, ['axis([' num2str(world) ']);\n']);
             fprintf(script_fid, 'drawnow;\n');
+            fprintf(script_fid, 'pause(ts);\n');
             fprintf(script_fid, 'if record_game\n');
             fprintf(script_fid, '  watch = [watch getframe];\n');
             fprintf(script_fid, 'end\n');
