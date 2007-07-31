@@ -1591,6 +1591,10 @@ joystick. The values are obtained in the call,
 sim('getjoy');
 @end example
 
+The joystick input is still experimental and has not been tested very
+much. Getting it to work may take some effort. Or, it may just work
+for you.
+
 The axis values are stored in the array @code{joyaxis}, buttons in
 @code{joybutton} and the hat in @code{joyhat}. Axis values are between
 -1 and 1. Buttons are either 0 (unpressed) and 1 (pressed). The hat
