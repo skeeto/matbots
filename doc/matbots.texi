@@ -41,6 +41,7 @@ preserved.
 * Programming Basics::   Basic bot information
 * Creating a Bot::       Writing a bot by example
 * Bot Behavior::         Bot features and etiquette
+* Human Interface::      Fight your own bots yourself
 * Simple Example::       A simple example bot
 * Targeting Bot::        Simple example extended for targeting
 * Index::                Concept index
@@ -75,6 +76,7 @@ your external program from Matlab.
 @menu
 * Invocation::         Invoking the engine
 * Engine Settings::    Game options and settings
+* Directories::        Matbots file tree
 @end menu
 
 @c Invocation
@@ -264,6 +266,30 @@ entire @code{move_cost} amount.
 turn at once. Setting this to a low value will greatly reduce the
 movement capabilities of the bots. Setting this value high will make
 watching games a boring activity (really!).
+
+@c Directories
+@node Directories
+@section Directories
+
+The Matbots directory should contain three subdirectories and three
+files: @file{engine.m}, @file{engine_settings.m}, and
+@file{player_list.txt}. These files were explain previously.
+
+The @file{doc} subdirectory contains documentation, which should
+include this document you are reading now.
+
+The @file{bots} directory contains all of the bots. Bots can really be
+thrown anywhere, but this is where bots should really go. This is
+where people will look for them.
+
+The @file{func} directory contains useful functions that some bots
+use. One such function is @code{eplot} found in @file{eplot.m}. The
+engine itself uses this function. @xref{Useful Functions}.
+
+@cindex human
+The @file{human} directory contains ``bots'' that are controlled by
+human beings (at least in part) rather than by a program. In it are
+the needed files to obtain the human input. @xref{Human Interface}.
 
 @c ---------------------------------------------------------------------
 @c Programming Basics
@@ -522,7 +548,12 @@ bots wander in range at the same time, they will both be hurt.
 to a distance of @code{D}, where @code{D} is a floating point value. A
 negative value for distance will result in a grenade tossed
 backwards. The maximum distance a grenade can be tossed is determined
-by @code{grenade_throw_max}.
+by @code{grenade_throw_max}. 
+
+Grenade toss heading and distance values are both padded with uniform
+random values to give them slight inaccuracy. The random padding
+amount is determined by @code{grenade_dfuzz} (distance) and
+@code{grenade_rfuzz} (heading).
 
 A grenade explodes upon reaching its toss distance. This explosion
 releases @code{grenade_bits} rifle shots evenly in all directions from
@@ -1241,6 +1272,7 @@ This completes our search and destroy bot. For the full code, see
 
 @menu
 * Well Behaved Bots::   Bot etiquette
+* Useful Functions::    Provided bot functions
 * Bot Plotting::        Bots plotting in the game area
 * Existing Bots::       Useful bots
 @end menu
@@ -1290,6 +1322,103 @@ violation of this rule.
 Of course, your bot does not @emph{have} to be well behaved. This is a
 just a set of guidelines. The most interesting bots may not follow
 these guidelines at all.
+
+@c Useful Functions
+@node Useful Functions
+@section Useful Functions
+@cindex func
+
+There are functions that you may find useful in the @file{func}
+directory (including @code{eplot}). Many of these are drawing
+functions that can be called to give a bot a different look.
+
+@menu
+* drawface::        Draw a face
+* drawghost::       Draw a ghost
+* drawhand::        Draw a hand
+* drawenterprise::  Draw the Enterprise from Star Trek
+* dodge_bullets::   Dodge rifle shots
+@end menu
+
+@c drawface
+@node drawface
+@subsection drawface
+@cindex face
+
+This function draws a face,
+
+@example
+function drawface (xpos, ypos, heading, radius, color)
+@end example
+
+The face is drawn at (@code{xpos}, @code{ypos}) leering in direction
+@code{heading}. Its size is @code{radius} and color is
+@code{color}. Generally, you will want to pass @code{player@{9@}} in
+as the color.
+
+@c drawghost
+@node drawghost
+@subsection drawghost
+
+Draws a ghost from the famous game Pacman,
+
+@example
+function drawghost (xpos, ypos, heading, radius, color)
+@end example
+
+The Pacman ghost is drawn at (@code{xpos}, @code{ypos}) drifting in
+direction @code{heading}. Its size is @code{radius} and color is
+@code{color}. Generally, you will want to pass @code{player@{9@}} in
+as the color.
+
+@c drawhand
+@node drawhand
+@subsection drawhand
+
+Draws a hand proudly displaying its favorite finger,
+
+@example
+function drawhand (xpos, ypos, heading, radius, color)
+@end example
+
+An offensive drawing is plotted at (@code{xpos}, @code{ypos}) pointing
+in direction @code{heading}. Its size is @code{radius} and color is
+@code{color}. Generally, you will want to pass @code{player@{9@}} in
+as the color.
+
+@c drawenterprise
+@node drawenterprise
+@subsection drawenterprise
+
+Draws the starship Enterprise (from Star Trek),
+
+@example
+function drawenterprise (xpos, ypos, heading, radius, color)
+@end example
+
+The Enterprise is drawn at (@code{xpos}, @code{ypos}) engaging in
+direction @code{heading}. Its size is @code{radius} and color is
+@code{color}. Generally, you will want to pass @code{player@{9@}} in
+as the color.
+
+@c dodge_bullets
+@node dodge_bullets
+@subsection dodge_bullets
+
+This function tells a bot if it needs to dodge and, if needed, where
+to dodge. It is simple, providing adequate dodging abilities, and is
+much faster than the more complex dodging algorithms contained in some
+of the bots.
+
+@example
+function [indanger deltaH throttle] = ...
+                          dodge_bullets (player, objects)
+@end example
+
+If the bot is currently in danger from existing bullets,
+@code{indanger} will be set to true. If the bot is in danger,
+@code{deltaH} and @code{throttle} are the return values the bot should
+use to escape the danger.
 
 @c Bot Plotting
 @node Bot Plotting
@@ -1438,6 +1567,50 @@ The @dfn{snitch} is currently the number one bot, but it requires
 immense CPU time compared to other bots. It will dodge just about
 anything you can throw at it and can quickly eliminate other opponents
 early on. Currently, however, the snitch is no good at close combat.
+
+@c ---------------------------------------------------------------------
+@c Human Interface
+@node Human Interface
+@chapter Human Interface
+
+A human interface exists to allow you to control a bot during the
+gameplay. In situations where the game has slowed way down, control
+may become very difficult.
+
+Currently, only joystick input is available. Until other interfaces
+are figured out, this will be the only human input. You will need to
+have Simulink, but no special Simulink packages. An s-function has
+been written in C to interface the with joystick. This s-function is
+placed inside Simulink where values can be pulled from the joystick
+inputs.
+
+Adjustments to the ``human*.m'' bots may be needed to fit your
+joystick. The values are obtained in the call,
+
+@example
+sim('getjoy');
+@end example
+
+The axis values are stored in the array @code{joyaxis}, buttons in
+@code{joybutton} and the hat in @code{joyhat}. Axis values are between
+-1 and 1. Buttons are either 0 (unpressed) and 1 (pressed). The hat
+values are between 0 and 8 inclusive, indicating the 9 possible hat
+positions. Experiment to find out what values match what joystick
+inputs.
+
+``human'' is a simple interface for a single stick joystick. Forward
+and backward control throttle. Left and right control heading changes.
+
+``human_tank'' is made for two stick gamepads. Controls work like tank
+treads. Forward is both sticks forward. Backward is both sticks
+backward. Turning is full back on one and full forward on the
+other. Combinations in between these lead to circular movement.
+
+``human_hdcmd'' (heading command) is what many people will find as the
+most comfortable, but it requires three axes. This will work fine on a
+normal joystick with a ``throttle'' axis. The joystick directly
+commands the heading and the third axis controls the throttle. This
+input type allows for maximum control of the bot.
 
 @c ---------------------------------------------------------------------
 @node Simple Example
