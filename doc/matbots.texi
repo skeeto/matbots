@@ -51,22 +51,52 @@ preserved.
 @node Preface
 @unnumbered Preface
 
-@c boring as hell!!! fix this
-@c XXX write more and make it more interesting
+Matbots, not originally under any name, began as a small project to
+pass the time. It was a throw away program meant to try out an
+automated chasing algorithm. A circle traveled chaotically around a
+plot while an asterisk limited only by speed, chased this poor circle.
 
-This game we have going here began as a small project by Michael
-Abraham. To kill some time, he wrote a program where one circle chased
-another circle around a plot. Chris Wellons suggested that the engine
-be extended to allow different bots to be written and plugged in.
+The circle did not care, of course, what the asterisk was doing. It
+was thinking of nothing in particular. According to Jerry Seinfeld,
+this circle was just a typical man: ``We're not thinking
+anything. We're just walking around, looking around. [...] just kinda
+check stuff out.''
 
-Eventually, these bots could do things like fire bullets and drop
-mines. People nearby began to notice the bots at war on our computer
-screens and became interested in writing bots.
+It was later suggested by on onlooker that this circle @emph{should}
+be concerned about the asterisk. Who wants an asterisk following them
+around all day? Later on the circle gets home and an asterisk follows
+it in the front door. Asterisks are rude. The circle needed some
+defense.
 
-By having these bots written in Matlab, you have all of Matlab's tools
-at your disposal. You can also interface with external tools as well,
-which means you could write your bot in C or C++ and make calls to
-your external program from Matlab.
+To make this work, the circle was given its own personal function! It
+was granted autonomy by way of its own address space and scope. Also,
+as seen all throughout history, the circle was given a gun to protect
+this new freedom from the invading asterisk.
+
+But what fun is that if the asterisk doesn't get a gun as well?
+
+Eventually the asterisk became a circle and more ``bots'', with new
+and unique behavior, began to join the game. Over time they gained new
+abilities, such as dropping mines and high fiving each other. Some
+bots were better than other bots, which lead to escalation of skills
+(and CPU time!). Counter-bots were written to counter these
+bots. Counter-counter bots were written to counter these counter-bots
+... ad infinitum.
+
+By having these bots written in Matlab, all of Matlab's tools are at
+the programmer's disposal. A bot could also be written in other
+languages and interfaced with the Matbots engine (this is how the
+human interface works).
+
+Writing a matbot is an exercise in programming as well as mathematics,
+as the game area is not discrete. Matbot positions are floating point
+values. Writing a good targeting algorithm involves calculus
+(determining a bot's future position) and statistics (evaluating past
+game data). Writing a successful bot has become more complicated than
+we (the Matbot authors) had ever imagined, but it is a lot of fun to
+stretch our minds around the puzzles of programming one.
+
+Enjoy programming Matbots!
 
 @c ---------------------------------------------------------------------
 @c Setup
