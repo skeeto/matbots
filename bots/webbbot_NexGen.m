@@ -321,17 +321,6 @@ else
         targeting_nums(:,2) = 0;
     end
     
-%     our_shots_in_air
-%     riflers
-%     targeting_nums
-%     dist_list
-%     pause
-%     for i = 1:how_many_total-1
-%         if ~strcmp(state{i}{5},team)
-%             eval(['health_',num2str(state{i}{6}),' = state{i}{3}'])
-%         end
-%     end
-%     pause
 
 %% WRITE TO MAT FILE
            % if I want to write something this would be a good time
@@ -501,7 +490,6 @@ else
             throttle = 0;
         end
     else
-    %         [deltaH throttle action] = dodgeball(how_many_total,state,objects,player);
             action = '';
             throttle = 0;
     end
