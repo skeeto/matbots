@@ -52,7 +52,7 @@ elseif how_many_we == how_many_total && isempty(req)
         throttle = 0;
         deltaH = deltaH_max;
         action = '';
-        plot_me(my_color,'',xpos,ypos,heading,'big')
+        plot_me(my_color,'',player,'big','')
         if how_many_we == 1 || state{who_we(1)}{6} > num
             [y,Fs,bits] = wavread('my_sounds.wav');
             hell_be_engr = y(220000:240000);
@@ -95,9 +95,9 @@ else
 
     if how_many_we ~= 1
         if game_step < 10
-            eplot('text',xpos,ypos+.5,['READY ???'])
+            eplot('text',xpos,ypos+.5*health/25,['READY ???'])
         elseif game_step > 15 && game_step <= 20
-            eplot('text',xpos,ypos+.5,'LET''S DO THIS !!!!!')
+            eplot('text',xpos,ypos+.5*health/25,'LET''S DO THIS !!!!!')
         end
 
         if game_step == 1;
@@ -364,6 +364,7 @@ load(['goteam',team,'.mat'])
 filename = ['power',superduper,'.mat'];
 load(filename)
 
+arm = '';
 
 
 %% FIND TARGET
@@ -494,6 +495,7 @@ else
             our_shots_in_air(total_my_shots+1,2) = t_hit;
             save(filename,'targeting_nums','where_they_at','our_shots_in_air','leader','team_says')
             my_color = 'r';
+            arm = 'shoot';
         else 
             action = '';
             throttle = 0;
@@ -504,7 +506,7 @@ else
             throttle = 0;
     end
 end
-plot_me(my_color,words,xpos,ypos,heading)
+plot_me(my_color,words,player,'',arm)
 
 %% DODGEBALL
 function [deltaH throttle action] = dodgeball(how_many_total,state,objects, player)
@@ -536,15 +538,15 @@ if num ~= leader && game_step < 20
     time_num = team_says{my_says_num,3};
     
     if game_step > time_num+3 && game_step < time_num+8     
-        eplot('text',xpos,ypos+.5,team_says{my_says_num,2})
+        eplot('text',xpos,ypos+.5*health/25,team_says{my_says_num,2})
     end
 elseif num ~= leader && game_step > 18 && game_step < 25
-    eplot('text',xpos,ypos+.5,['KILL ''EM!!!!!!'])
+    eplot('text',xpos,ypos+.5*health/25,['KILL ''EM!!!!!!'])
 end
 
 %% FIND THREATS
 
-sec_search = .45;
+sec_search = .55;
 search_rad = rifle_speed*sec_search; %this is the radius to find all things within sec_search seconds from me
 
 count = 1;
@@ -728,7 +730,7 @@ if exist('bullets','var')
                end
            end
        end
-       plot_me(my_color,'',xpos,ypos,heading)
+       plot_me(my_color,'',player,'','')
        if ~exist('deltaH','var')
            deltaH = 0;
            disp('no DeltaH - not safe')
@@ -756,12 +758,12 @@ else % no bullets in the air that aren't mine
 
     if ~isempty(who_close)
         [deltaH throttle action] = make_my_day(who_close,enemies,heading);
-        plot_me(my_color,'rrrrr',xpos,ypos,heading)
+        plot_me(my_color,'rrrrr',player,'','')
     elseif health <= 3*rifle_damage
         deltaH = 0;
         throttle = 0;
         action = ['HtoE-',num2str(energy/2)];
-        plot_me('w','',xpos,ypos,heading)
+        plot_me('w','',player,'','')
     else
         [deltaH throttle action] = act_now(how_many_total,state,objects,player);
     end
@@ -864,23 +866,109 @@ else
 end
 
 %% PLOT
-function plot_me(my_color,words,xpos,ypos,heading,size)
+function plot_me(my_color,words,player,size,arm)
 engine_settings
 
-if ~exist('size','var')
-    scalex = 1;
-    scaley = 1;
-    line = .5;
-elseif strcmp(size,'big')
+xpos = player{1};
+ypos = player{2};
+health = player{3};
+energy = player{4};
+team = player{5};
+num = player{6};
+name = player{7};
+heading = player{8};
+
+load(['goteam',team,'.mat'])
+filename = ['power',superduper,'.mat'];
+load(filename)
+
+
+if ~strcmp(size,'big')
+    scale = health/50;
+    % little dude
+    
+    a = -pi/2:.1:3*pi/2;
+    x1 = .25*cos(a);
+    y1 = .25*sin(a)+.75;
+    x2 = [0,0];
+    y2 = [.5,-.1];
+    x4 = [-.25,0,.25];
+    y4 = [-1,-.1,-1];
+
+    X = [x1,x2,x4]*scale + xpos;
+    Y = [y1,y2,y4]*scale + ypos;
+
+    eplot(X,Y,'color',my_color)
+
+    x_e = .05*cos(a);
+    y_e = .05*sin(a);
+    eplot('fill',(x_e-.10)*scale + xpos,(y_e+.85)*scale + ypos,my_color)
+    eplot('fill',(x_e+.10)*scale + xpos,(y_e+.85)*scale + ypos,my_color)
+
+    a1 = -5*pi/6:.1:-pi/6;
+    x_s = (.1*cos(a1))*scale + xpos;
+    y_s = (.1*sin(a1)+.70)*scale + ypos;
+    eplot((x_s),(y_s),'color',my_color)
+
+    an = 0:.1:pi;
+    x_n = (.03*cos(an))*scale + xpos;
+    y_n = (.04*sin(an)+.725)*scale + ypos;
+    eplot(x_n,y_n,'color',my_color)
+
+    if strcmp(arm,'shoot')
+        x_a1 = [0,.1, .4, .1];
+        y_a1 = [0, -.3, -.3,-.3];
+        x_a2 = [0,.08,.35];
+        y_a2 = [0,-.35,-.35];
+        X_a = [x_a1,x_a2];
+        Y_a = [y_a1,y_a2];
+        
+        sign = 1;
+        if heading > pi
+            heading = heading-2*pi;
+        end
+        if heading < -pi
+            heading = headin +2*pi;
+        end
+        if heading > pi/2 || heading < -pi/2
+            sign = -1;
+            heading = -(heading-pi);
+        end
+    
+        rotate = [ cos(heading) -sin(heading) ; ...
+                   sin(heading)  cos(heading) ];
+        look = rotate*[X_a;Y_a];
+
+        look(1,:) = scale*sign*look(1,:) + xpos;
+        look(2,:) = scale*(look(2,:) + .4) + ypos;
+
+        eplot(look(1,:),look(2,:),'color',my_color)
+
+        x_gun = [.25,.36,.7,.75,.40,.35,.25];
+        y_gun = [-.36,-.21,-.21,-.29,-.29,-.325,-.36];
+        
+        gun = rotate*([x_gun;y_gun]);
+        gun(1,:) = scale*(sign*gun(1,:)) + xpos;
+        gun(2,:) = scale*(gun(2,:) + .4) + ypos;
+
+        eplot('fill',gun(1,:),gun(2,:),'r')
+    else
+        x = [0,-.25,0,.25,0,0]*scale + xpos;
+        y = [.4,.25,0,.25,.4,-.1]*scale + ypos;
+        eplot(x,y,'color',my_color)
+    end
+        
+    eplot('text',xpos+.25,ypos+.25,words)
+    
+    
+else
     scalex = (world(2)-world(1))/(2*.75*.25);
     scaley = (world(4)-world(3))/(2*.75*.25);
     xpos = (world(1)+world(2))/2;
     ypos = (world(3)+world(4))/2;
     heading = pi/2;
     line = 15;
-    
-end
-% my aw thing
+    % my aw thing
     xpic = scalex*0.75*[-.25 -.125  0 .0625 -.0625 .0625 .125 .25];
     ypic = scaley*0.75*[ .20 -.25 .25 0     0      0   -.25  .20];
     
@@ -892,7 +980,14 @@ end
     look(2,:) = look(2,:) + ypos;
  
     eplot(look(1,:),look(2,:),'color',my_color,'linewidth',line)
+    
+    
     eplot('text',xpos+.25,ypos+.25,words)
+end
+
+
+
+
 
 
 
