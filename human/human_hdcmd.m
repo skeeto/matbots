@@ -28,8 +28,6 @@ elseif joybutton(7)
     action = 'mine';
 elseif joybutton(9)
     action = 'grenade2';
-elseif joybutton(11)
-    pause
 end
 
 % Laser guide
