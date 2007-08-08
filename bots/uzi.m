@@ -1,4 +1,15 @@
 function [deltaH throttle action] = uzi(state,player,objects,req)
+% UZI
+% coded by: Mike Abraham
+% last update: 07/17/2007
+%
+% This bot is similar to the TEAMSNIPE bot, but with a few differences.
+% The UZI bot is a team-based bot.  Each UZI bot picks a different target
+% and tries to kill that target AS SOON AS POSSIBLE.  The clusternum
+% variable will change how many UZI's will aim at each target.  If
+% clusternum is 1, then each UZI will pick a different target.  If
+% clusternum is 2, then the 2 UZI bots will aim at each target, etc.
+% Unfortunately, UZI bots do not move.
 
 clusternum = 1;
 
