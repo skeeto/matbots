@@ -1,4 +1,17 @@
 function [deltaH throttle action] = hexabot(state,player,objects,req)
+% HEXABOT
+% coded by: Mike Abraham
+% last update: 08/07/2007
+%
+% This bot has potential.  Unfortunately, there are still several design
+% flaws.  HEXABOT is a team bot.  All of a team's HEXABOTs form together at
+% the beginning of the game and then move around as a unit... basically,
+% they become one large bot.  Once they are in formation, they all do
+% EXACTLY the same thing.  The bot in the center is the leader.  If a
+% HEXABOT dies, the team reforms immediately.  Also, the HEXABOT group
+% changes its shooting strategy based upon what type of bot it is
+% attacking.  They use a sweep-style shooting logic when going after bots
+% that can dodge bullets.
 
 engine_settings;
 %% Datafile initialization, preclean, clean
@@ -356,8 +369,8 @@ while abs(dB-dT)>0.00001
     dT = norm([x0+target_speed*cos(h)*time-xpos y0+target_speed*sin(h)*time-ypos]);
     counter = counter+1;
     if counter>10
-        targetx = x0
-        targety = y0
+        targetx = x0;
+        targety = y0;
         return
     end
 end
