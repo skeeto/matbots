@@ -1,4 +1,13 @@
 function [deltaH throttle action] = snitch(state,player,objects,req)
+% SNITCH
+% coded by: Mike Abraham
+% last update: 08/07/2007
+%
+% This was the first bot that had the ability to successfully dodge
+% bullets. Unforunately, SNITCH requires a huge amount of CPU resources.
+% SNITCH still needs improvements: some strange things happen with his
+% aiming algorithm and his behavior when bots get too close is a little
+% odd.  However, SNITCH is definitely NOT an easy bot to defeat.
 
 sniper(state,player,objects,req);
 uzi(state,player,objects,req);
@@ -14,8 +23,11 @@ num = player{6};
 name = player{7};
 heading = player{8};
 
+nothers = length(state);
+
 Rstep = .05;
 Hstep = 10*pi/180;
+mayhem_radius = rifle_radius*rifle_speed;
 
 Hlist = 0;
 for i = Hstep:Hstep:pi
@@ -149,6 +161,24 @@ else
         end %while dH
         R = R+Rstep;
     end %while safe
+end
+
+for i = 1:nothers
+    if ~strcmp(state{i}{5},team)
+        if norm([xpos-state{i}{1} ypos-state{i}{2}])<mayhem_radius
+           if norm([xpos-state{i}{1} ypos-state{i}{2}])<mine_radius
+               action = 'mine';
+           else
+            targetx = state{i}{1};
+            targety = state{i}{2};
+            aim = atan2(targety-ypos,targetx-xpos);
+            deltaH = aim-heading;
+            deltaH = mod(deltaH+pi,2*pi)-pi;
+            action = 'rifle';
+            throttle = -1;
+           end
+        end
+    end
 end
 
 end %snitch function
