@@ -153,7 +153,7 @@ To start a game, simply execute the file @file{engine.m},
 
 @cindex engine_settings.m
 The file @code{engine_settings.m} stores all of the game settings and
-options that effect the gameplay, logging, and display. The following
+options that affect the gameplay, logging, and display. The following
 explains these different settings found in the above file.
 
 @menu
